@@ -1,8 +1,245 @@
-{% extends 'base.html' %}
+{% extends "base.html" %} {% block content %}
 
-{% block content %}
-<div class="flex flex-col justify-center items-center h-screen">
-    <h1 class="text-3xl font-bold text-gray-800 mb-4">Dashboard Coming Soon!</h1>
-    <p class="text-gray-600 text-lg">Stay tuned while we prepare your analytics experience!</p>
+<div class="flex min-h-screen">
+  <main class="flex-1 bg-gray-50 p-8 overflow-y-auto">
+    <h1 class="text-3xl font-bold mb-2">Your Dashboard</h1>
+    <p class="text-gray-600 mb-8">Welcome back. Here's your data overview.</p>
+
+    <!-- Overview Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {% for card in [ {'title': 'Average Steps', 'value': '9,014', 'change':
+      '+12%', 'color': 'green'}, {'title': 'Sleep Quality', 'value': '7.6/10',
+      'change': '+4%', 'color': 'green'}, {'title': 'Average Mood', 'value':
+      '8.1/10', 'change': '-2%', 'color': 'red'}, {'title': 'Trend Score',
+      'value': '87/100', 'change': '+5%', 'color': 'green'} ] %}
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-gray-500 text-sm mb-2">{{ card.title }}</h2>
+        <p class="text-2xl font-bold">{{ card.value }}</p>
+        <p class="text-{{ card.color }}-500 text-sm mt-2">
+          {{ card.change }} {% if card.color == 'green' %}↑{% else %}↓{% endif
+          %}
+        </p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Charts Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-lg font-semibold">Daily Step Count</h2>
+            <p class="text-gray-500 text-sm">Your steps over the last week</p>
+          </div>
+        </div>
+        <div class="relative w-full h-80">
+          <canvas id="stepsChart" class="w-full h-full"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-lg font-semibold">Sleep Patterns</h2>
+            <p class="text-gray-500 text-sm">Hours of sleep per day</p>
+          </div>
+        </div>
+        <div class="relative w-full h-80">
+          <canvas id="sleepChart" class="w-full h-full"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-lg font-semibold">Mood Distribution</h2>
+            <p class="text-gray-500 text-sm">
+              Breakdown of your recorded moods
+            </p>
+          </div>
+        </div>
+        <div class="relative w-full h-80">
+          <canvas id="moodChart" class="w-full h-full"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-lg font-semibold">Sleep vs Mood Correlation</h2>
+            <p class="text-gray-500 text-sm">How sleep affects your mood</p>
+          </div>
+        </div>
+        <div class="relative w-full h-80">
+          <canvas id="sleepMoodChart" class="w-full h-full"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analysis Summary -->
+    <div class="bg-white p-8 rounded-lg shadow-md max-w-6xl mx-auto">
+      <h2 class="text-2xl font-bold mb-2">Analysis Summary</h2>
+      <p class="text-gray-500 mb-6">Key insights from your data</p>
+
+      <div class="space-y-6 text-gray-700 text-base">
+        <div>
+          <h4 class="font-semibold mb-1">Steps Analysis</h4>
+          <p>
+            Your average daily step count is
+            <span class="font-bold">9,014 steps</span>, which is
+            <span class="text-green-600">12% higher</span> than last week.
+            You're most active on Saturdays, and least active on Thursdays.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-semibold mb-1">Sleep Patterns</h4>
+          <p>
+            You're averaging <span class="font-bold">7.5 hours</span> of sleep
+            per night, which is within the recommended range. Your sleep quality
+            appears to drop midweek, with improvements on weekends.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-semibold mb-1">Mood Correlations</h4>
+          <p>
+            There's a strong positive correlation between your sleep duration
+            and mood. Days with 8+ hours of sleep consistently show higher mood
+            scores. Physical activity also appears to have a positive impact on
+            your mood.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="font-semibold mb-1">Recommendations</h4>
+          <p>
+            Based on your data, maintaining consistent sleep patterns and a
+            minimum of 8,000 steps daily could help optimize your overall
+            wellbeing. Consider increasing activity on Thursdays to balance your
+            weekly activity levels.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Chart.js Config -->
+<script>
+  const stepsCtx = document.getElementById('stepsChart').getContext('2d');
+  new Chart(stepsCtx, {
+    type: 'bar',
+    data: {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      datasets: [
+        {
+          label: 'Steps',
+          data: [7500, 8200, 9100, 6800, 10200, 11500, 9800],
+          backgroundColor: '#5D3FD3',
+          borderRadius: 5,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+    },
+  });
+
+  const sleepCtx = document.getElementById('sleepChart').getContext('2d');
+  new Chart(sleepCtx, {
+    type: 'line',
+    data: {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      datasets: [
+        {
+          label: 'Sleep (hours)',
+          data: [7, 6.5, 8, 7, 6, 8.5, 9],
+          borderColor: '#20B2AA',
+          backgroundColor: '#20B2AA',
+          tension: 0.4,
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
+    },
+  });
+
+  const moodCtx = document.getElementById('moodChart').getContext('2d');
+  new Chart(moodCtx, {
+    type: 'pie',
+    data: {
+      labels: ['Happy 45%', 'Neutral 30%', 'Tired 15%', 'Stressed 10%'],
+      datasets: [
+        {
+          data: [45, 30, 15, 10],
+          backgroundColor: ['#5D3FD3', '#20B2AA', '#FF7F50', '#FFBB28'],
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+        },
+      },
+    },
+  });
+
+  const sleepMoodCtx = document
+    .getElementById('sleepMoodChart')
+    .getContext('2d');
+  new Chart(sleepMoodCtx, {
+    type: 'line',
+    data: {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      datasets: [
+        {
+          label: 'Sleep (hours)',
+          data: [7, 6.5, 8, 7, 6, 8.5, 9],
+          borderColor: '#20B2AA',
+          backgroundColor: '#20B2AA',
+          tension: 0.4,
+          yAxisID: 'y1',
+          fill: false,
+        },
+        {
+          label: 'Mood (score)',
+          data: [8, 7, 9, 6, 8, 9, 10],
+          borderColor: '#FF7F50',
+          backgroundColor: '#FF7F50',
+          tension: 0.4,
+          yAxisID: 'y2',
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
+      scales: {
+        y1: { type: 'linear', position: 'left' },
+        y2: { type: 'linear', position: 'right' },
+      },
+    },
+  });
+</script>
+
 {% endblock %}

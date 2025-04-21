@@ -52,3 +52,15 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'success')
     return redirect(url_for('main.login'))
+
+# Upload page
+@main.route('/upload')
+@login_required
+def upload():
+    return render_template('upload.html')  # (create upload.html later even if empty for now)
+
+# Share page
+@main.route('/share')
+@login_required
+def share():
+    return render_template('share.html')  # (create share.html later even if empty for now)

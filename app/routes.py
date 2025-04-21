@@ -1,28 +1,54 @@
-from flask import Blueprint, render_template
+from flask import flash, redirect, url_for
 
-main = Blueprint('main', __name__)
+# Existing imports
+from app import app, db
+from app.forms import RegistrationForm, LoginForm
+from app.models import User
 
-@main.route('/')
+from flask_login import login_user, logout_user, login_required
+
+# Landing Page
+@app.route('/')
 def index():
     return render_template('index.html')
 
-@main.route('/upload')
-def upload():
-    return render_template('upload.html')
-
-@main.route('/visualize')
-def visualize():
-    return render_template('visualize.html')
-
-@main.route('/share')
-def share():
-    return render_template('share.html')
-
-# ADD THESE TWO TEMPORARY ROUTES
-@main.route('/login')
-def login():
-    return "<h1>Login Page Coming Soon</h1>"
-
-@main.route('/register')
+# Register Page
+@app.route('/register', methods=['GET', 'POST'])
 def register():
-    return "<h1>Register Page Coming Soon</h1>"
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(name=form.name.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Account created', 'success')
+        return redirect(url_for('login'))
+    return render_template('register.html', form=form)
+
+# Login Page
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user)
+            flash('Login successful!', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid credentials. Please try again.', 'danger')
+    return render_template('login.html', form=form)
+
+# Dashboard Page
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return render_template('dashboard.html')
+
+# Logout (optional for now)
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('login'))

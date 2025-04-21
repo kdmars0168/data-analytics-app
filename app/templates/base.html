@@ -14,7 +14,10 @@
     />
 
     <!-- FontAwesome for icons -->
-    <script src="https://kit.fontawesome.com/79abed24e4.js" crossorigin="anonymous"></script>
+    <script
+      src="https://kit.fontawesome.com/79abed24e4.js"
+      crossorigin="anonymous"
+    ></script>
     <!-- Replace 'your_fontawesome_kit.js' with your free FontAwesome kit link OR use public one -->
 
     <style>
@@ -32,16 +35,37 @@
   <body class="bg-gray-50 text-gray-800">
     <!-- Navbar -->
     <nav class="flex justify-between items-center p-6 bg-white shadow-sm">
-        <div class="flex items-center space-x-2 text-purple-600 font-bold text-2xl">
-          <i class="fas fa-chart-bar"></i> <span>DataWhisper</span>
-        </div>
-        <div class="flex items-center space-x-6 text-sm font-semibold">
-          <a href="{{ url_for('main.login') }}" class="text-gray-700 hover:text-purple-600">Login</a>
-          <a href="{{ url_for('main.register') }}" class="px-5 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition">
-            Get Started
-          </a>
-        </div>
-      </nav>
+      <div
+        class="flex items-center space-x-2 text-purple-600 font-bold text-2xl"
+      >
+        <i class="fas fa-chart-bar"></i> <span>DataWhisper</span>
+      </div>
+      <div class="flex items-center space-x-6 text-sm font-semibold">
+        <a
+          href="{{ url_for('main.login') }}"
+          class="text-gray-700 hover:text-purple-600"
+          >Login</a
+        >
+        <a
+          href="{{ url_for('main.register') }}"
+          class="px-5 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition"
+        >
+          Get Started
+        </a>
+      </div>
+    </nav>
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div class="p-4">
+      {% for category, message in messages %}
+      <div
+        class="mb-4 p-3 rounded text-white bg-{{ 'green-500' if category == 'success' else 'red-500' if category == 'danger' else 'blue-500' }}"
+      >
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %} {% endwith %}
 
     <!-- Content -->
     {% block content %}{% endblock %}

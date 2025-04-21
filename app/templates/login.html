@@ -1,0 +1,65 @@
+{% extends 'base.html' %} {% block title %}Login | DataWhisper{% endblock %} {%
+block content %}
+<section
+  class="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+>
+  <div class="max-w-md w-full space-y-8">
+    <div class="text-center">
+      <div class="flex justify-center mb-4">
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-chart-bar text-purple-600 text-4xl"></i>
+          <h2 class="text-3xl font-extrabold text-gray-900">DataWhisper</h2>
+        </div>
+      </div>
+      <p class="text-gray-500 text-sm">Personal data analytics, simplified.</p>
+    </div>
+
+    <div class="bg-white p-8 shadow rounded-lg space-y-6">
+      <div class="text-center">
+        <h2 class="text-2xl font-bold">Welcome back</h2>
+        <p class="text-gray-500 text-sm">Sign in to your account to continue</p>
+      </div>
+
+      <form
+        action="{{ url_for('main.login') }}"
+        method="POST"
+        class="space-y-4"
+      >
+        {{ form.hidden_tag() }}
+        <div>
+          {{ form.email.label(class="block text-sm font-medium text-gray-700
+          text-left") }} {{ form.email(class="mt-1 w-full rounded-md
+          border-gray-300 shadow-sm focus:border-purple-500
+          focus:ring-purple-500") }}
+        </div>
+
+        <div>
+          {{ form.password.label(class="block text-sm font-medium text-gray-700
+          text-left") }} {{ form.password(class="mt-1 w-full rounded-md
+          border-gray-300 shadow-sm focus:border-purple-500
+          focus:ring-purple-500") }}
+        </div>
+
+        <div>
+          {{ form.submit(class="w-full flex justify-center py-2 px-4 border
+          border-transparent rounded-md shadow-sm text-white bg-purple-600
+          hover:bg-purple-700 font-semibold") }}
+        </div>
+      </form>
+
+      <p class="mt-2 text-center text-sm text-gray-600">
+        Don't have an account?
+        <a
+          href="{{ url_for('main.register') }}"
+          class="text-purple-600 hover:text-purple-500 font-semibold"
+          >Sign up</a
+        >
+      </p>
+
+      <p class="mt-6 text-xs text-gray-400 text-center">
+        For demo: use <strong>demo@example.com / password123</strong>
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

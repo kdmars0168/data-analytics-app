@@ -1,0 +1,43 @@
+input[type='text'],
+input[type='email'],
+input[type='password'] {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #d1d5db; /* Light gray border */
+  border-radius: 0.5rem; /* Rounded corners */
+  background-color: #f9fafb; /* Light background */
+  font-size: 1rem;
+  color: #111827; /* Dark text */
+  outline: none;
+  transition: border-color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+}
+
+input[type='text']:focus,
+input[type='email']:focus,
+input[type='password']:focus {
+  border-color: #7c3aed; /* Purple border on focus */
+  background-color: #ffffff; /* White background on focus */
+}
+
+body {
+  font-family: 'Inter', 'Poppins', 'Segoe UI', sans-serif;
+}
+
+button,
+input[type='submit'] {
+  background-color: #7c3aed; /* Deep purple */
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-align: center;
+  transition: background-color 0.2s ease-in-out;
+  width: 100%;
+}
+
+button:hover,
+input[type='submit']:hover {
+  background-color: #6d28d9; /* Slightly darker on hover */
+}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{% block title %}DataWhisper{% endblock %}</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Poppins -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- FontAwesome for icons -->
+    <script src="https://kit.fontawesome.com/79abed24e4.js" crossorigin="anonymous"></script>
+    <!-- Replace 'your_fontawesome_kit.js' with your free FontAwesome kit link OR use public one -->
+
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+      }
+    </style>
+
+    <link
+      href="{{ url_for('static', filename='css/styles.css') }}"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body class="bg-gray-50 text-gray-800">
+    <!-- Navbar -->
+    <nav class="flex justify-between items-center p-6 bg-white shadow-sm">
+        <div class="flex items-center space-x-2 text-purple-600 font-bold text-2xl">
+          <i class="fas fa-chart-bar"></i> <span>DataWhisper</span>
+        </div>
+        <div class="flex items-center space-x-6 text-sm font-semibold">
+          <a href="{{ url_for('main.login') }}" class="text-gray-700 hover:text-purple-600">Login</a>
+          <a href="{{ url_for('main.register') }}" class="px-5 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition">
+            Get Started
+          </a>
+        </div>
+      </nav>
+
+    <!-- Content -->
+    {% block content %}{% endblock %}
+
+    <!-- Footer -->
+    <footer class="bg-white mt-20 text-center py-6 text-sm text-gray-500">
+      <p>© 2025 DataWhisper. All rights reserved.</p>
+    </footer>
+  </body>
+</html>

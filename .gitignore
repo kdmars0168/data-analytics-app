@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# Instance folder containing SQLite DB
+instance/
+*.db
+
+# VSCode settings
+.vscode/
+
+# MacOS and Windows system files
+.DS_Store
+Thumbs.db

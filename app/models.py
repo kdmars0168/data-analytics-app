@@ -1,8 +1,10 @@
 from app import db
 from datetime import datetime
+from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-class User(db.Model):
+class User(db.Model, UserMixin):
+    # your existing columns here
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
@@ -10,7 +12,7 @@ class User(db.Model):
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
-    
+
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
@@ -24,3 +26,7 @@ class SharedData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data_id = db.Column(db.Integer, db.ForeignKey('uploaded_data.id'))
     shared_with_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+
+def load_user(user_id):
+    return User.query.get(int(user_id))

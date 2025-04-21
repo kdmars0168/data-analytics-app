@@ -1,19 +1,19 @@
-from flask import flash, redirect, url_for
-
-# Existing imports
-from app import app, db
+from flask import Blueprint, render_template, flash, redirect, url_for, request
+from app import db
 from app.forms import RegistrationForm, LoginForm
 from app.models import User
-
 from flask_login import login_user, logout_user, login_required
 
+# Create a Blueprint called 'main'
+main = Blueprint('main', __name__)
+
 # Landing Page
-@app.route('/')
+@main.route('/')
 def index():
     return render_template('index.html')
 
 # Register Page
-@app.route('/register', methods=['GET', 'POST'])
+@main.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -21,12 +21,12 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Account created', 'success')
-        return redirect(url_for('login'))
+        flash('Account created successfully!', 'success')
+        return redirect(url_for('main.login'))
     return render_template('register.html', form=form)
 
 # Login Page
-@app.route('/login', methods=['GET', 'POST'])
+@main.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
@@ -34,21 +34,21 @@ def login():
         if user and user.check_password(form.password.data):
             login_user(user)
             flash('Login successful!', 'success')
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('main.dashboard'))
         else:
             flash('Invalid credentials. Please try again.', 'danger')
     return render_template('login.html', form=form)
 
 # Dashboard Page
-@app.route('/dashboard')
+@main.route('/dashboard')
 @login_required
 def dashboard():
     return render_template('dashboard.html')
 
-# Logout (optional for now)
-@app.route('/logout')
+# Logout
+@main.route('/logout')
 @login_required
 def logout():
     logout_user()
     flash('You have been logged out.', 'success')
-    return redirect(url_for('login'))
+    return redirect(url_for('main.login'))

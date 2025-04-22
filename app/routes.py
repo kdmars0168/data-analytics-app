@@ -3,6 +3,7 @@ from app import db
 from app.forms import RegistrationForm, LoginForm
 from app.models import User
 from flask_login import login_user, logout_user, login_required
+from app.utils import generate_analysis_summary
 
 # Create a Blueprint called 'main'
 main = Blueprint('main', __name__)
@@ -43,7 +44,16 @@ def login():
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('dashboard.html')
+    # Demo: In a real app, you would pull user-specific uploaded data
+    user_data = {
+        'steps': [117200, 8500, 9100, 7000, 10400, 11500, 9600],
+        'sleep': [7, 6.5, 8, 7, 6, 8.5, 9],
+        'mood': [8, 7, 9, 6, 8, 9, 10],
+    }
+
+    analysis = generate_analysis_summary(user_data)
+
+    return render_template('dashboard.html', analysis=analysis)
 
 # Logout
 @main.route('/logout')

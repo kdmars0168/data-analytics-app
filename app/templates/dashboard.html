@@ -1,11 +1,47 @@
 {% extends "base.html" %} {% block content %}
-
 <div class="flex min-h-screen">
   <main class="flex-1 bg-gray-50 p-8 overflow-y-auto">
-    <h1 class="text-3xl font-bold mb-2">Your Dashboard</h1>
-    <p class="text-gray-600 mb-8">Welcome back. Here's your data overview.</p>
+    <div class="flex justify-between items-center mb-6">
+      <div class="flex space-x-4" id="data-filters">
+        <button
+          id="filter-all"
+          class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100"
+        >
+          All Data
+        </button>
+        <button
+          id="filter-steps"
+          class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100"
+        >
+          Steps
+        </button>
+        <button
+          id="filter-sleep"
+          class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100"
+        >
+          Sleep
+        </button>
+        <button
+          id="filter-mood"
+          class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100"
+        >
+          Mood
+        </button>
+      </div>
+      <div>
+        <select
+          id="time-filter"
+          class="border border-purple-500 rounded px-4 py-2 text-sm focus:outline-none"
+        >
+          <option value="daily">Daily</option>
+          <option value="weekly" selected>Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="yearly">Yearly</option>
+        </select>
+      </div>
+    </div>
 
-    <!-- Overview Cards -->
+    <!-- Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {% for card in [ {'title': 'Average Steps', 'value': '9,014', 'change':
       '+12%', 'color': 'green'}, {'title': 'Sleep Quality', 'value': '7.6/10',
@@ -23,223 +59,82 @@
       {% endfor %}
     </div>
 
-    <!-- Charts Grid -->
+    <!-- Graphs -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center mb-4">
-          <div>
-            <h2 class="text-lg font-semibold">Daily Step Count</h2>
-            <p class="text-gray-500 text-sm">Your steps over the last week</p>
-          </div>
-        </div>
-        <div class="relative w-full h-80">
-          <canvas id="stepsChart" class="w-full h-full"></canvas>
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center mb-4">
-          <div>
-            <h2 class="text-lg font-semibold">Sleep Patterns</h2>
-            <p class="text-gray-500 text-sm">Hours of sleep per day</p>
-          </div>
-        </div>
-        <div class="relative w-full h-80">
-          <canvas id="sleepChart" class="w-full h-full"></canvas>
+        <h2 class="text-lg font-semibold mb-2">Daily Step Count</h2>
+        <p class="text-gray-500 text-sm mb-4">Your steps over the last week</p>
+        <div class="relative w-full" style="height: 320px">
+          <canvas
+            id="stepsChart"
+            class="absolute top-0 left-0 w-full h-full"
+          ></canvas>
         </div>
       </div>
 
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center mb-4">
-          <div>
-            <h2 class="text-lg font-semibold">Mood Distribution</h2>
-            <p class="text-gray-500 text-sm">
-              Breakdown of your recorded moods
-            </p>
-          </div>
-        </div>
-        <div class="relative w-full h-80">
-          <canvas id="moodChart" class="w-full h-full"></canvas>
+        <h2 class="text-lg font-semibold mb-2">Sleep Patterns</h2>
+        <p class="text-gray-500 text-sm mb-4">Hours of sleep per day</p>
+        <div class="relative w-full" style="height: 320px">
+          <canvas
+            id="sleepChart"
+            class="absolute top-0 left-0 w-full h-full"
+          ></canvas>
         </div>
       </div>
 
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center mb-4">
-          <div>
-            <h2 class="text-lg font-semibold">Sleep vs Mood Correlation</h2>
-            <p class="text-gray-500 text-sm">How sleep affects your mood</p>
-          </div>
+        <h2 class="text-lg font-semibold mb-2">Mood Distribution</h2>
+        <p class="text-gray-500 text-sm mb-4">
+          Breakdown of your recorded moods
+        </p>
+        <div class="relative w-full" style="height: 320px">
+          <canvas
+            id="moodChart"
+            class="absolute top-0 left-0 w-full h-full"
+          ></canvas>
         </div>
-        <div class="relative w-full h-80">
-          <canvas id="sleepMoodChart" class="w-full h-full"></canvas>
+      </div>
+
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-lg font-semibold mb-2">Sleep vs Mood Correlation</h2>
+        <p class="text-gray-500 text-sm mb-4">How sleep affects your mood</p>
+        <div class="relative w-full" style="height: 320px">
+          <canvas
+            id="sleepMoodChart"
+            class="absolute top-0 left-0 w-full h-full"
+          ></canvas>
         </div>
       </div>
     </div>
 
     <!-- Analysis Summary -->
-    <div class="bg-white p-8 rounded-lg shadow-md max-w-6xl mx-auto">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full">
       <h2 class="text-2xl font-bold mb-2">Analysis Summary</h2>
       <p class="text-gray-500 mb-6">Key insights from your data</p>
 
       <div class="space-y-6 text-gray-700 text-base">
         <div>
           <h4 class="font-semibold mb-1">Steps Analysis</h4>
-          <p>
-            Your average daily step count is
-            <span class="font-bold">9,014 steps</span>, which is
-            <span class="text-green-600">12% higher</span> than last week.
-            You're most active on Saturdays, and least active on Thursdays.
-          </p>
+          <p>{{ analysis.steps_analysis }}</p>
         </div>
-
         <div>
           <h4 class="font-semibold mb-1">Sleep Patterns</h4>
-          <p>
-            You're averaging <span class="font-bold">7.5 hours</span> of sleep
-            per night, which is within the recommended range. Your sleep quality
-            appears to drop midweek, with improvements on weekends.
-          </p>
+          <p>{{ analysis.sleep_patterns }}</p>
         </div>
-
         <div>
           <h4 class="font-semibold mb-1">Mood Correlations</h4>
-          <p>
-            There's a strong positive correlation between your sleep duration
-            and mood. Days with 8+ hours of sleep consistently show higher mood
-            scores. Physical activity also appears to have a positive impact on
-            your mood.
-          </p>
+          <p>{{ analysis.mood_correlation }}</p>
         </div>
-
         <div>
           <h4 class="font-semibold mb-1">Recommendations</h4>
-          <p>
-            Based on your data, maintaining consistent sleep patterns and a
-            minimum of 8,000 steps daily could help optimize your overall
-            wellbeing. Consider increasing activity on Thursdays to balance your
-            weekly activity levels.
-          </p>
+          <p>{{ analysis.recommendations }}</p>
         </div>
       </div>
     </div>
   </main>
 </div>
 
-<!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Chart.js Config -->
-<script>
-  const stepsCtx = document.getElementById('stepsChart').getContext('2d');
-  new Chart(stepsCtx, {
-    type: 'bar',
-    data: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      datasets: [
-        {
-          label: 'Steps',
-          data: [7500, 8200, 9100, 6800, 10200, 11500, 9800],
-          backgroundColor: '#5D3FD3',
-          borderRadius: 5,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-    },
-  });
-
-  const sleepCtx = document.getElementById('sleepChart').getContext('2d');
-  new Chart(sleepCtx, {
-    type: 'line',
-    data: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      datasets: [
-        {
-          label: 'Sleep (hours)',
-          data: [7, 6.5, 8, 7, 6, 8.5, 9],
-          borderColor: '#20B2AA',
-          backgroundColor: '#20B2AA',
-          tension: 0.4,
-          fill: false,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        mode: 'index',
-        intersect: false,
-      },
-    },
-  });
-
-  const moodCtx = document.getElementById('moodChart').getContext('2d');
-  new Chart(moodCtx, {
-    type: 'pie',
-    data: {
-      labels: ['Happy 45%', 'Neutral 30%', 'Tired 15%', 'Stressed 10%'],
-      datasets: [
-        {
-          data: [45, 30, 15, 10],
-          backgroundColor: ['#5D3FD3', '#20B2AA', '#FF7F50', '#FFBB28'],
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-        },
-      },
-    },
-  });
-
-  const sleepMoodCtx = document
-    .getElementById('sleepMoodChart')
-    .getContext('2d');
-  new Chart(sleepMoodCtx, {
-    type: 'line',
-    data: {
-      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-      datasets: [
-        {
-          label: 'Sleep (hours)',
-          data: [7, 6.5, 8, 7, 6, 8.5, 9],
-          borderColor: '#20B2AA',
-          backgroundColor: '#20B2AA',
-          tension: 0.4,
-          yAxisID: 'y1',
-          fill: false,
-        },
-        {
-          label: 'Mood (score)',
-          data: [8, 7, 9, 6, 8, 9, 10],
-          borderColor: '#FF7F50',
-          backgroundColor: '#FF7F50',
-          tension: 0.4,
-          yAxisID: 'y2',
-          fill: false,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: {
-        mode: 'index',
-        intersect: false,
-      },
-      scales: {
-        y1: { type: 'linear', position: 'left' },
-        y2: { type: 'linear', position: 'right' },
-      },
-    },
-  });
-</script>
-
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

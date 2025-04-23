@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, render_template, flash, redirect, url_for, request
 from app import db
 from app.forms import RegistrationForm, LoginForm
@@ -68,6 +69,21 @@ def logout():
 @login_required
 def upload():
     return render_template('upload.html')  # (create upload.html later even if empty for now)
+
+@main.route('/download_template')
+@login_required
+def download_template():
+    # Define the directory where the template is located
+    template_dir = os.path.join(current_app.root_path, 'static', 'assets')
+    # Return the file as a download
+    return send_from_directory(template_dir, 'template.csv', as_attachment=True)
+
+@main.route('/submit_manual', methods=['POST'])
+@login_required
+def submit_manual():
+
+    flash('Manual data submitted successfully!', 'success')
+    return redirect(url_for('main.upload')) 
 
 # Share page
 @main.route('/share')

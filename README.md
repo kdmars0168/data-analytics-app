@@ -26,7 +26,7 @@ A data analytics web application that allows users to upload personal datasets, 
 |----------|--------------------|-------------------|
 | 24117314 | Mohaimen Al Rashid  | kdmars0168         |
 | 24343523 | Boyu Shen           | Ethan-zzz-zzz |
-| 24103568 | Silvia Gao          | (GitHub username pending) |
+| 24103568 | Silvia Gao          | SilviaRuth |
 
 ---
 

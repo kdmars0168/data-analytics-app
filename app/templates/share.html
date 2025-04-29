@@ -1,60 +1,252 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-8">
-  <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
-    <h1 class="text-2xl font-bold text-purple-600 mb-4">Share Dashboard</h1>
-    <p class="text-gray-700 mb-6">Share your dashboard with others using the options below:</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Your Data</title>
+    <link rel="stylesheet" href="static/css/sharestyles.css">
 
-    <!-- Copy Link -->
-    <div class="mb-4">
-      <label for="dashboard-link" class="block text-sm font-medium text-gray-700 mb-2">Dashboard Link</label>
-      <div class="flex">
-        <button
-          id="copy-link"
-          class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 text-sm font-semibold rounded-r"
-        >
-          Copy Link
-        </button>
-      </div>
-    </div>
+</head>
+<body>
 
-    <!-- Share via Email -->
-    <div class="mb-4">
-      <a
-        href="mailto:?subject=Check out this Dashboard&body=Here is the link to the dashboard: {{ request.url_root }}dashboard"
-        class="w-full flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-lg"
-      >
-        Share via Email
-      </a>
-    </div>
+<div class="main-content">
+    <div class="share-container">
+        <header>
+            <h1>Share Your Data</h1>
+            <p>Securely share your visualizations with specific people.</p>
+        </header>
 
-    <!-- Share on Social Media -->
-    <div class="flex space-x-4">
-      <a
-        href="https://twitter.com/intent/tweet?text=Check out this Dashboard!&url={{ request.url_root }}dashboard"
-        target="_blank"
-        class="flex-1 flex items-center justify-center bg-blue-400 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg"
-      >
-        Twitter
-      </a>
-      <a
-        href="https://www.facebook.com/sharer/sharer.php?u={{ request.url_root }}dashboard"
-        target="_blank"
-        class="flex-1 flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
-      >
-        Facebook
-      </a>
+        <!-- Tabs Navigation -->
+        <div class="tabs">
+            <button id="tab-share-data" class="tab-button active" data-tab="share-data-content">
+                Share Data
+            </button>
+            <button id="tab-manage-data" class="tab-button" data-tab="manage-data-content">
+                Manage Shared Data
+            </button>
+        </div>
+
+        <!-- Tab Content -->
+        <div class="tab-content-area">
+
+            <!-- Share Data Tab Content -->
+            <div id="share-data-content" class="tab-pane active">
+                <section class="content-section">
+                    <h2>Select Visualizations to Share</h2>
+                    <p class="section-subtitle">Choose which charts and insights you want to share</p>
+                    <ul class="selection-list visualization-list">
+                        <li>
+                            <label for="viz1">
+                                <input type="checkbox" id="viz1">
+                                <span class="item-details">
+                                    <span class="item-name">Weekly Step Count</span>
+                                    <span class="item-meta">Bar Chart - Created 2025-04-05</span>
+                                </span>
+                            </label>
+                        </li>
+                        <li>
+                            
+                            <label for="viz2">
+                                <input type="checkbox" id="viz2">
+                                <span class="item-details">
+                                    <span class="item-name">Sleep Patterns</span>
+                                    <span class="item-meta">Line Chart - Created 2025-04-08</span>
+                                </span>
+                            </label>
+                        </li>
+                         <li>
+                            <label for="viz3">
+                                <input type="checkbox" id="viz3">
+                                <span class="item-details">
+                                    <span class="item-name">Mood Distribution</span>
+                                    <span class="item-meta">Pie Chart - Created 2025-04-12</span>
+                                </span>
+                            </label>
+                        </li>
+                         <li>
+                            <label for="viz4">
+                                <input type="checkbox" id="viz4">
+                                <span class="item-details">
+                                    <span class="item-name">Sleep vs Mood</span>
+                                    <span class="item-meta">Line Chart - Created 2025-04-15</span>
+                                </span>
+                            </label>
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="content-section">
+                    <h2>Select Recipients</h2>
+                     <p class="section-subtitle">Choose people to share your selected visualizations with</p>
+                    <div class="add-recipient-form">
+                        <input type="email" placeholder="Add new recipient by email">
+                        <button class="btn btn-primary btn-add">Add</button>
+                    </div>
+                    <h3 class="contacts-heading">Your Contacts</h3>
+                    <ul class="selection-list contact-list">
+                       <li>
+                           <label for="contact1">
+                                <input type="checkbox" id="contact1">
+                               <span class="item-details">
+                                   <span class="item-name">Jane Smith</span>
+                                   <span class="item-meta">jane@example.com</span>
+                               </span>
+                           </label>
+                       </li>
+                       <li>
+                           <label for="contact2">
+                                 <input type="checkbox" id="contact2">
+                               <span class="item-details">
+                                   <span class="item-name">John Doe</span>
+                                   <span class="item-meta">john@example.com</span>
+                               </span>
+                           </label>
+                       </li>
+                        <li>
+                            <label for="contact3">
+                                <input type="checkbox" id="contact3">
+                                <span class="item-details">
+                                    <span class="item-name">Sarah Wilson</span>
+                                    <span class="item-meta">sarah@example.com</span>
+                                </span>
+                            </label>
+                        </li>
+                         <li>
+                            <label for="contact4">
+                                <input type="checkbox" id="contact4">
+                                <span class="item-details">
+                                    <span class="item-name">Michael Brown</span>
+                                    <span class="item-meta">michael@example.com</span>
+                                </span>
+                            </label>
+                        </li>
+                         <li>
+                            <label for="contact5">
+                                <input type="checkbox" id="contact5">
+                                <span class="item-details">
+                                    <span class="item-name">Emily Jones</span>
+                                    <span class="item-meta">emily@example.com</span>
+                                </span>
+                            </label>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- Personalized Message Section -->
+                <section class="content-section">
+                    <label for="personalized-message" class="message-label">Personalized Message (Optional)</label>
+                    <textarea id="personalized-message" rows="3" placeholder="I'd like to share my data insights with you. Check out these visualizations."></textarea>
+                </section>
+
+                 <!-- Share Actions Footer -->
+                <footer>
+                    <button class="btn btn-primary btn-share">
+                        Share Now
+                    </button>
+                </footer>
+            </div>
+
+            <!-- Manage Shared Data Tab Content -->
+            <div id="manage-data-content" class="tab-pane">
+                <section class="content-section">
+                    <h2>People With Access</h2>
+                    <p class="section-subtitle">Manage who can see your shared visualizations</p>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Shared Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="icon person-icon">👤</span> Jane Smith</td>
+                                    <td><span class="icon email-icon">✉️</span> jane@example.com</td>
+                                    <td>2025-04-10</td>
+                                    <td><span class="status status-viewed"><span class="icon status-icon">🟡</span> Viewed</span></td>
+                                    <td><button class="btn-revoke"><span class="icon revoke-icon">⊖</span> Revoke</button></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="icon person-icon">👤</span> John Doe</td>
+                                    <td><span class="icon email-icon">✉️</span> john@example.com</td>
+                                    <td>2025-04-12</td>
+                                    <td><span class="status status-pending"><span class="icon status-icon">⚪</span> Pending</span></td>
+                                    <td><button class="btn-revoke"><span class="icon revoke-icon">⊖</span> Revoke</button></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="icon person-icon">👤</span> Sarah Wilson</td>
+                                    <td><span class="icon email-icon">✉️</span> sarah@example.com</td>
+                                    <td>2025-04-15</td>
+                                    <td><span class="status status-accepted"><span class="icon status-icon">🟢</span> Accepted</span></td>
+                                    <td><button class="btn-revoke"><span class="icon revoke-icon">⊖</span> Revoke</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+                 <section class="content-section">
+                    <h2>Visualization Sharing Status</h2>
+                    <p class="section-subtitle">Manage which visualizations are shared</p>
+                     <div class="table-container">
+                        <table class="data-table">
+                             <thead>
+                                <tr>
+                                    <th>Visualization</th>
+                                    <th>Type</th>
+                                    <th>Created Date</th>
+                                    <th>Shared</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Weekly Step Count</td>
+                                    <td>Bar Chart</td>
+                                    <td>2025-04-05</td>
+                                    <td>Yes / Toggle</td> <!-- Example, replace with actual status/control -->
+                                </tr>
+                                 <tr>
+                                    <td>Sleep Patterns</td>
+                                    <td>Line Chart</td>
+                                    <td>2025-04-08</td>
+                                     <td>Yes / Toggle</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
 
 <script>
-  // Copy Link to Clipboard
-  document.getElementById('copy-link').addEventListener('click', () => {
-    const linkInput = document.getElementById('dashboard-link');
-    linkInput.select();
-    document.execCommand('copy');
-    alert('Dashboard link copied to clipboard!');
-  });
+    // Basic Tab Switching Logic
+    const tabButtons = document.querySelectorAll('.tab-button');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetTabId = button.getAttribute('data-tab');
+
+            // Update button active states
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            // Update pane visibility
+            tabPanes.forEach(pane => {
+                if (pane.id === targetTabId) {
+                    pane.classList.add('active');
+                } else {
+                    pane.classList.remove('active');
+                }
+            });
+        });
+    });
+
 </script>
+</body>
 {% endblock %}

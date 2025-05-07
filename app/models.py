@@ -11,6 +11,11 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(256), nullable=False)
     uploaded_data = db.relationship('UploadedData', backref='owner', lazy=True)
     shared_data = db.relationship('SharedData', backref='shared_with', lazy=True)
+    gender = db.Column(db.String(10))  
+    dob = db.Column(db.Date)           
+    height = db.Column(db.Float)      
+    weight = db.Column(db.Float)       
+    medical_conditions = db.Column(db.Text)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

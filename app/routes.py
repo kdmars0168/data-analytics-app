@@ -1,12 +1,11 @@
-import os
-from flask import Blueprint, render_template, flash, redirect, url_for, request
+import os, json
+from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify
 from app import db
-from app.forms import RegistrationForm, LoginForm
-from app.models import User
+from app.forms import RegistrationForm, LoginForm, EditProfileForm
+from app.models import User, UploadedData, SharedData
 from flask_login import login_user, logout_user, login_required,current_user
 from app.utils import generate_analysis_summary
-from app.forms import EditProfileForm
-from app.models import User 
+
 
 
 # Create a Blueprint called 'main'
@@ -56,16 +55,13 @@ def login():
 @main.route('/dashboard')
 @login_required
 def dashboard():
-    # Demo: In a real app, you would pull user-specific uploaded data
-    user_data = {
-        'steps': [117200, 8500, 9100, 7000, 10400, 11500, 9600],
-        'sleep': [7, 6.5, 8, 7, 6, 8.5, 9],
-        'mood': [8, 7, 9, 6, 8, 9, 10],
+    chart_data = {
+        "daily": {"steps": [...], "sleep": [...], "mood": [...]},
+        "weekly": {"steps": [...], "sleep": [...], "mood": [...]},
+        "monthly": {"steps": [...], "sleep": [...], "mood": [...]},
+        "yearly": {"steps": [...], "sleep": [...], "mood": [...]},
     }
-
-    analysis = generate_analysis_summary(user_data)
-
-    return render_template('dashboard.html', analysis=analysis)
+    return render_template('dashboard.html', chart_data=json.dumps(chart_data))
 
 # Logout
 @main.route('/logout')

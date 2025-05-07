@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -10,6 +11,8 @@ login_manager = LoginManager()
 def create_app():
     app = Flask(__name__)
     app.config.from_object('config.Config')
+    instance_path = os.path.join(app.root_path, '..', 'instance')
+    os.makedirs(instance_path, exist_ok=True)
 
     db.init_app(app)
     migrate.init_app(app, db)

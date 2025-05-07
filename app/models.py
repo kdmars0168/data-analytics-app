@@ -41,3 +41,13 @@ class SharedData(db.Model):
 
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+class HealthRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    date = db.Column(db.Date, nullable=False)
+    steps = db.Column(db.Integer, nullable=False)
+    sleep_hours = db.Column(db.Float, nullable=False)
+    mood = db.Column(db.Integer, nullable=False)  # Mood score 1–10
+
+    user = db.relationship('User', backref='health_records')

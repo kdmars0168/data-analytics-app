@@ -1,109 +1,71 @@
-{% extends "base.html" %} {% block content %}
+{% extends "base.html" %}
+{% block content %}
 <div class="flex min-h-screen">
   <main class="flex-1 bg-gray-50 p-8 overflow-y-auto">
     <div class="flex justify-between items-center mb-6">
       <div class="flex space-x-4" id="data-filters">
-        <button
-          id="filter-all"
-          class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100"
-        >
-          All Data
-        </button>
-        <button
-          id="filter-steps"
-          class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100"
-        >
-          Steps
-        </button>
-        <button
-          id="filter-sleep"
-          class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100"
-        >
-          Sleep
-        </button>
-        <button
-          id="filter-mood"
-          class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100"
-        >
-          Mood
-        </button>
+        <button id="filter-all" class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100">All Data</button>
+        <button id="filter-steps" class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100">Steps</button>
+        <button id="filter-sleep" class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100">Sleep</button>
+        <button id="filter-mood" class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100">Mood</button>
       </div>
       <div>
-        <select
-          id="time-filter"
-          class="border border-purple-500 rounded px-4 py-2 text-sm focus:outline-none"
-        >
-          <option value="daily">Daily</option>
-          <option value="weekly" selected>Weekly</option>
-          <option value="monthly">Monthly</option>
+        <select id="time-filter" class="border border-purple-500 rounded px-4 py-2 text-sm focus:outline-none">
+          <option value="daily">Last 7 Days</option>
+          <option value="weekly" selected>Last 6 Weeks</option>
+          <option value="monthly">Last 6 Months</option>
           <option value="yearly">Yearly</option>
         </select>
       </div>
     </div>
 
-    <!-- Cards -->
+    <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {% for card in [ {'title': 'Average Steps', 'value': '9,014', 'change':
-      '+12%', 'color': 'green'}, {'title': 'Sleep Quality', 'value': '7.6/10',
-      'change': '+4%', 'color': 'green'}, {'title': 'Average Mood', 'value':
-      '8.1/10', 'change': '-2%', 'color': 'red'}, {'title': 'Trend Score',
-      'value': '87/100', 'change': '+5%', 'color': 'green'} ] %}
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-gray-500 text-sm mb-2">{{ card.title }}</h2>
-        <p class="text-2xl font-bold">{{ card.value }}</p>
-        <p class="text-{{ card.color }}-500 text-sm mt-2">
-          {{ card.change }} {% if card.color == 'green' %}↑{% else %}↓{% endif
-          %}
-        </p>
+        <h2 class="text-gray-500 text-sm mb-2">Average Steps</h2>
+        <p class="text-2xl font-bold">{{ summary.average_steps }}</p>
       </div>
-      {% endfor %}
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-gray-500 text-sm mb-2">Sleep Quality</h2>
+        <p class="text-2xl font-bold">{{ summary.sleep_quality }}/10</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-gray-500 text-sm mb-2">Average Mood</h2>
+        <p class="text-2xl font-bold">{{ summary.average_mood }}/10</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-gray-500 text-sm mb-2">Trend Score</h2>
+        <p class="text-2xl font-bold">{{ summary.trend_score }}/100</p>
+      </div>
     </div>
 
     <!-- Graphs -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-semibold mb-2">Daily Step Count</h2>
-        <p class="text-gray-500 text-sm mb-4">Your steps over the last week</p>
-        <div class="relative w-full" style="height: 320px">
-          <canvas
-            id="stepsChart"
-            class="absolute top-0 left-0 w-full h-full"
-          ></canvas>
+        <h2 class="text-lg font-semibold mb-2">Step Count</h2>
+        <div class="w-full h-[320px]">
+          <canvas id="stepsChart" class="w-full h-full"></canvas>
         </div>
       </div>
 
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-semibold mb-2">Sleep Patterns</h2>
-        <p class="text-gray-500 text-sm mb-4">Hours of sleep per day</p>
-        <div class="relative w-full" style="height: 320px">
-          <canvas
-            id="sleepChart"
-            class="absolute top-0 left-0 w-full h-full"
-          ></canvas>
+        <h2 class="text-lg font-semibold mb-2">Sleep Hours</h2>
+        <div class="w-full h-[320px]">
+          <canvas id="sleepChart" class="w-full h-full"></canvas>
         </div>
       </div>
 
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-semibold mb-2">Mood Distribution</h2>
-        <p class="text-gray-500 text-sm mb-4">
-          Breakdown of your recorded moods
-        </p>
-        <div class="relative w-full" style="height: 320px">
-          <canvas
-            id="moodChart"
-            class="absolute top-0 left-0 w-full h-full"
-          ></canvas>
+        <h2 class="text-lg font-semibold mb-2">Mood Trends</h2>
+        <div class="w-full h-[320px]">
+          <canvas id="moodChart" class="w-full h-full"></canvas>
         </div>
       </div>
 
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-lg font-semibold mb-2">Sleep vs Mood Correlation</h2>
-        <p class="text-gray-500 text-sm mb-4">How sleep affects your mood</p>
-        <div class="relative w-full" style="height: 320px">
-          <canvas
-            id="sleepMoodChart"
-            class="absolute top-0 left-0 w-full h-full"
-          ></canvas>
+        <h2 class="text-lg font-semibold mb-2">Sleep vs Mood</h2>
+        <div class="w-full h-[320px]">
+          <canvas id="sleepMoodChart" class="w-full h-full"></canvas>
         </div>
       </div>
     </div>

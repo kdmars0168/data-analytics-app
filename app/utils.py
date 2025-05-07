@@ -1,11 +1,20 @@
 def generate_analysis_summary(data):
-    steps = data['steps']
-    sleep = data['sleep']
-    mood = data['mood']
+    steps = data.get('steps', [])
+    sleep = data.get('sleep', [])
+    mood = data.get('mood', [])
+    
+    if not steps or not sleep or not mood:
+        return {
+            "steps_analysis": "No data available.",
+            "sleep_patterns": "No data available.",
+            "mood_correlation": "No data available.",
+            "recommendations": "Please upload your health data to receive analysis and insights."
+        }
 
-    avg_steps = sum(steps) / len(steps)
-    avg_sleep = sum(sleep) / len(sleep)
-    avg_mood = sum(mood) / len(mood)
+    # Safely handle empty lists
+    avg_steps = sum(steps) / len(steps) if steps else 0
+    avg_sleep = sum(sleep) / len(sleep) if sleep else 0
+    avg_mood = sum(mood) / len(mood) if mood else 0
 
     analysis = {
         "steps_analysis": "",
@@ -79,17 +88,12 @@ def generate_analysis_summary(data):
     # Recommendations
     recommendations = []
 
-    # Based on steps
     if avg_steps < 8000:
         recommendations.append("Try setting a daily steps goal and take small walks throughout the day.")
-    
-    # Based on sleep
     if avg_sleep < 7:
         recommendations.append("Improve sleep hygiene: maintain a regular sleep schedule, limit screens before bed, and relax before sleeping.")
     elif avg_sleep > 9:
         recommendations.append("Monitor why you might be oversleeping; address possible fatigue causes.")
-
-    # Based on mood
     if avg_mood < 7:
         recommendations.append("Engage in activities you enjoy. Physical exercise, socializing, and mindful practices can boost mood.")
 

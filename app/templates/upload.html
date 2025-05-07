@@ -100,4 +100,10 @@ document.querySelectorAll('.tab-trigger').forEach(btn => {
   });
 });
 </script>
+<script>
+  // Get chart data from backend
+  const chartData = JSON.parse('{{ chart_data|safe }}');
+  // Use chartData instead of dummyData in your dashboard.js
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 {% endblock %}

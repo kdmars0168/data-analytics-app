@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
+
 {% block title %}Profile | DataWhisper{% endblock %}
+
 {% block content %}
 <section class="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
   <div class="max-w-md w-full space-y-8">
@@ -15,25 +17,64 @@
 
     <div class="bg-white p-8 shadow rounded-lg space-y-4">
       <div class="text-left space-y-2">
-        <p><span class="font-semibold text-gray-700">Name:</span> {{ user.name }}</p>
-        <p><span class="font-semibold text-gray-700">Email:</span> {{ user.email }}</p>
-        <p><span class="font-semibold text-gray-700">Gender:</span> {{ user.gender or 'Not specified' }}</p>
-        <p><span class="font-semibold text-gray-700">Date of Birth:</span> {{ user.dob or 'Not specified' }}</p>
-        <p><span class="font-semibold text-gray-700">Height:</span> {{ user.height or 'Not specified' }} cm</p>
-        <p><span class="font-semibold text-gray-700">Weight:</span> {{ user.weight or 'Not specified' }} kg</p>
-        <p><span class="font-semibold text-gray-700">Medical Conditions:</span> 
-          {% if user.medical_conditions %}
-            {{ user.medical_conditions }}
-          {% else %}
-            <span class="text-gray-400">None</span>
-          {% endif %}
-        </p>
-      </div>
+        <form method="POST" action="{{ url_for('main.save_profile') }}">
+          
+          <!-- Name Field -->
+          <div class="form-group">
+            <label for="name" class="text-gray-700 font-semibold">Name:</label>
+            <input type="text" name="name" id="name" value="{{ user.name }}" class="form-control" required>
+          </div>
 
-      <div class="pt-4">
-        <a href="{{ url_for('main.edit_profile') }}" class="w-full inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 font-semibold">
-          Edit Profile
-        </a>
+          <!-- Email Field -->
+          <div class="form-group">
+            <label for="email" class="text-gray-700 font-semibold">Email:</label>
+            <input type="email" name="email" id="email" value="{{ user.email }}" class="form-control" required>
+          </div>
+
+          <!-- Gender Field -->
+          <div class="form-group">
+            <label for="gender" class="text-gray-700 font-semibold">Gender:</label>
+            <input type="text" name="gender" id="gender" value="{{ user.gender }}" class="form-control">
+          </div>
+
+          <!-- Date of Birth (dob) Field -->
+          <div class="form-group">
+            <label for="dob" class="text-gray-700 font-semibold">Date of Birth:</label>
+            <input type="date" name="dob" id="dob" value="{{ user.dob }}" class="form-control">
+          </div>
+
+          <!-- Height Field -->
+          <div class="form-group">
+            <label for="height" class="text-gray-700 font-semibold">Height (cm):</label>
+            <input type="text" name="height" id="height" value="{{ user.height }}" class="form-control">
+          </div>
+
+          <!-- Weight Field -->
+          <div class="form-group">
+            <label for="weight" class="text-gray-700 font-semibold">Weight (kg):</label>
+            <input type="text" name="weight" id="weight" value="{{ user.weight }}" class="form-control">
+          </div>
+
+          <!-- Medical Conditions Field -->
+          <div class="form-group">
+            <label for="medical_conditions" class="block text-gray-700 font-semibold mb-1">Medical Conditions:</label>
+            <textarea name="medical_conditions"
+                      id="medical_conditions"
+                      class="block w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 text-sm resize-none"
+                      rows="2"
+                      placeholder="e.g. Diabetes, Hypertension">{{ user.medical_conditions }}</textarea>
+          </div>
+
+          <!-- Save and Cancel Buttons -->
+          <div class="flex justify-between items-center pt-4">
+            <button type="submit" class="w-1/2 py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 font-semibold">
+              Save
+            </button>
+            <a href="{{ url_for('main.profile') }}" class="w-1/2 py-2 px-4 text-center border border-transparent rounded-md shadow-sm text-white bg-gray-500 hover:bg-gray-600 font-semibold">
+              Cancel
+            </a>
+          </div>
+        </form>
       </div>
     </div>
   </div>

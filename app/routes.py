@@ -7,7 +7,7 @@ from flask_login import login_user, logout_user, login_required,current_user
 from app.utils import generate_analysis_summary
 from app.forms import EditProfileForm
 from app.models import User 
-
+from datetime import datetime
 
 # Create a Blueprint called 'main'
 main = Blueprint('main', __name__)
@@ -29,7 +29,12 @@ def register():
             return redirect(url_for('main.register'))
 
         # If email does not exist, create the new user
-        user = User(name=form.name.data, email=form.email.data)
+        user = User(name=form.name.data, email=form.email.data, gender=form.gender.data,
+    dob=form.dob.data,
+    height=form.height.data,
+    weight=form.weight.data,
+    medical_conditions=form.medical_conditions.data
+        )
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
@@ -105,16 +110,37 @@ def share():
 @login_required
 def profile():
     return render_template('profile.html', user=current_user)
-@main.route('/edit_profile', methods=['GET', 'POST'])
+@main.route('/profile/save', methods=['POST'])
 @login_required
-def edit_profile():
-    form = EditProfileForm(obj=current_user)
+def save_profile():
+    name = request.form.get('name')
+    email = request.form.get('email')
+    gender = request.form.get('gender')
+    dob_str = request.form.get('dob')
+    height = request.form.get('height')
+    weight = request.form.get('weight')
+    medical_conditions = request.form.get('medical_conditions')
 
-    if form.validate_on_submit():
-        current_user.username = form.username.data
-        current_user.about_me = form.about_me.data
-        db.session.commit()
-        flash('Your profile has been updated.', 'success')
+    try:
+        dob = datetime.strptime(dob_str, '%Y-%m-%d').date() if dob_str else None
+    except ValueError:
+        flash('Invalid date format. Please use YYYY-MM-DD.', 'error')
         return redirect(url_for('main.profile'))
 
-    return render_template('edit_profile.html', form=form)
+
+    current_user.name = name
+    current_user.email = email
+    current_user.gender = gender
+    current_user.dob = dob
+    current_user.height = float(height) if height else None
+    current_user.weight = float(weight) if weight else None
+    current_user.medical_conditions = medical_conditions
+
+    try:
+        db.session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('main.profile'))
+    except Exception as e:
+        db.session.rollback()
+        flash('An error occurred while saving your profile: ' + str(e), 'error')
+        return redirect(url_for('main.profile'))

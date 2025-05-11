@@ -1,8 +1,8 @@
-"""Initial migration
+"""empty message
 
-Revision ID: efe46465445d
+Revision ID: 5102c51ee813
 Revises: 
-Create Date: 2025-04-30 10:08:45.505085
+Create Date: 2025-05-07 22:55:10.109743
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'efe46465445d'
+revision = '5102c51ee813'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,12 +23,18 @@ def upgrade():
     sa.Column('name', sa.String(length=150), nullable=False),
     sa.Column('email', sa.String(length=150), nullable=False),
     sa.Column('password_hash', sa.String(length=256), nullable=False),
+    sa.Column('gender', sa.String(length=10), nullable=True),
+    sa.Column('dob', sa.Date(), nullable=True),
+    sa.Column('height', sa.Float(), nullable=True),
+    sa.Column('weight', sa.Float(), nullable=True),
+    sa.Column('medical_conditions', sa.Text(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
     op.create_table('uploaded_data',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('filename', sa.String(length=256), nullable=True),
+    sa.Column('file_path', sa.String(length=512), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('uploaded_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
@@ -38,6 +44,8 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('data_id', sa.Integer(), nullable=True),
     sa.Column('shared_with_user_id', sa.Integer(), nullable=True),
+    sa.Column('shared_at', sa.DateTime(), nullable=True),
+    sa.Column('status', sa.String(length=50), nullable=True),
     sa.ForeignKeyConstraint(['data_id'], ['uploaded_data.id'], ),
     sa.ForeignKeyConstraint(['shared_with_user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')

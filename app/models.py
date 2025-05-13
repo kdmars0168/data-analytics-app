@@ -45,13 +45,27 @@ class SharedData(db.Model):
     def __repr__(self):
         return f'<SharedData {self.data_id} to {self.shared_with_user_id}>'
 
-    def load_user(user_id):
-        return User.query.get(int(user_id))
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
+class HealthRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    date = db.Column(db.Date, nullable=False)
+    steps = db.Column(db.Integer, nullable=False)
+    sleep_hours = db.Column(db.Float, nullable=False)
+    mood = db.Column(db.Integer, nullable=False)  # Mood score 1–10
+
+    user = db.relationship('User', backref='health_records')
+
+
 class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100))
     email = db.Column(db.String(150), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
     def __repr__(self):
         return f"<Contact {self.name}>"

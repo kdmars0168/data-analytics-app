@@ -37,3 +37,7 @@ class EditProfileForm(FlaskForm):
     medical_conditions = TextAreaField('Medical Conditions', validators=[Optional()])
 
     submit = SubmitField('Save Changes')
+class ContactForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Add Contact')

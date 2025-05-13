@@ -16,6 +16,7 @@ class User(db.Model, UserMixin):
     height = db.Column(db.Float)      
     weight = db.Column(db.Float)       
     medical_conditions = db.Column(db.Text)
+    contacts = db.relationship('Contact', backref='user', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -44,5 +45,13 @@ class SharedData(db.Model):
     def __repr__(self):
         return f'<SharedData {self.data_id} to {self.shared_with_user_id}>'
 
-def load_user(user_id):
-    return User.query.get(int(user_id))
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+class Contact(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100))
+    email = db.Column(db.String(150), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    def __repr__(self):
+        return f"<Contact {self.name}>"

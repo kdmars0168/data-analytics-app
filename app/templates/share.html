@@ -75,62 +75,42 @@
                     </ul>
                 </section>
 
-                <section class="content-section">
-                    <h2>Select Recipients</h2>
-                     <p class="section-subtitle">Choose people to share your selected visualizations with</p>
-                    <div class="add-recipient-form">
-                        <input type="email" placeholder="Add new recipient by email">
-                        <button class="btn btn-primary btn-add">Add</button>
-                    </div>
-                    <h3 class="contacts-heading">Your Contacts</h3>
-                    <ul class="selection-list contact-list">
-                       <li>
-                           <label for="contact1">
-                                <input type="checkbox" id="contact1">
-                               <span class="item-details">
-                                   <span class="item-name">Jane Smith</span>
-                                   <span class="item-meta">jane@example.com</span>
-                               </span>
-                           </label>
-                       </li>
-                       <li>
-                           <label for="contact2">
-                                 <input type="checkbox" id="contact2">
-                               <span class="item-details">
-                                   <span class="item-name">John Doe</span>
-                                   <span class="item-meta">john@example.com</span>
-                               </span>
-                           </label>
-                       </li>
-                        <li>
-                            <label for="contact3">
-                                <input type="checkbox" id="contact3">
-                                <span class="item-details">
-                                    <span class="item-name">Sarah Wilson</span>
-                                    <span class="item-meta">sarah@example.com</span>
-                                </span>
-                            </label>
-                        </li>
-                         <li>
-                            <label for="contact4">
-                                <input type="checkbox" id="contact4">
-                                <span class="item-details">
-                                    <span class="item-name">Michael Brown</span>
-                                    <span class="item-meta">michael@example.com</span>
-                                </span>
-                            </label>
-                        </li>
-                         <li>
-                            <label for="contact5">
-                                <input type="checkbox" id="contact5">
-                                <span class="item-details">
-                                    <span class="item-name">Emily Jones</span>
-                                    <span class="item-meta">emily@example.com</span>
-                                </span>
-                            </label>
-                        </li>
-                    </ul>
-                </section>
+               <section class="content-section">
+        <h2>Select Recipients</h2>
+    <p class="section-subtitle">Choose people to share your selected visualizations with</p>
+
+    <form method="POST" class="add-recipient-form">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group mb-3">
+        {{ form.name.label }}
+        {{ form.name(style="width: 100%; height: 40px;", placeholder='Enter name', class="form-control") }}
+    </div>
+
+    <div class="form-group mb-3">
+        {{ form.email.label }}
+        {{ form.email(style="width: 100%; height: 40px;", placeholder='Enter email', class="form-control") }}
+    </div>
+
+    <div class="form-group">
+        {{ form.submit(class="btn btn-primary btn-add btn-lg", style="width: 100%; height: 40px;") }}
+    </div>
+</form>
+
+
+
+    <h3 class="contacts-heading">Your Contacts</h3>
+    <ul class="selection-list contact-list">
+        {% for contact in contacts %}
+            <li>
+                <span class="contact-name">{{ contact.name }}</span> - 
+                <span class="contact-email">{{ contact.email }}</span>
+            </li>
+        {% else %}
+            <li>No contacts added yet.</li>
+        {% endfor %}
+    </ul>
+</section>
 
                 <!-- Personalized Message Section -->
                 <section class="content-section">

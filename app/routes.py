@@ -11,9 +11,8 @@ from datetime import datetime
 from werkzeug.utils import secure_filename
 from collections import defaultdict
 from statistics import mean
-from app.forms import EditProfileForm
-from app.models import User 
-
+from app.forms import EditProfileForm, ContactForm
+from app.models import User, Contact
 
 # Create a Blueprint called 'main'
 main = Blueprint('main', __name__)
@@ -201,11 +200,50 @@ def submit_manual():
     flash('Data saved!', 'success')
     return redirect(url_for('main.upload'))
 
-@main.route('/share')
+@main.route('/submit_manual', methods=['POST'])
+@login_required
+def submit_manual():
+    date = request.form['date']
+    steps = request.form['steps']
+    sleep = request.form['sleep']
+    mood = request.form['mood']
+
+    record = HealthRecord(
+        user_id=current_user.id,
+        date=datetime.strptime(date, '%Y-%m-%d').date(),
+        steps=int(steps),
+        sleep_hours=float(sleep),
+        mood=int(mood)
+    )
+    db.session.add(record)
+    db.session.commit()
+    flash('Manual data submitted successfully!', 'success')
+    return redirect(url_for('main.upload'))
+
+
+@main.route('/share', methods=['GET', 'POST'])
 @login_required
 def share():
-    return render_template('share.html')
+    form = ContactForm()
 
+    if form.validate_on_submit():
+        existing_contact = Contact.query.filter_by(name=form.name.data, user_id=current_user.id).first()
+        if existing_contact:
+            flash('Contact name already exists.', 'danger')
+        else:
+            contact = Contact(
+                name=form.name.data,
+                email=form.email.data,
+                user_id=current_user.id 
+            )
+            db.session.add(contact)
+            db.session.commit()
+            flash('Contact added!', 'success')
+
+        return redirect(url_for('main.share'))
+
+    contacts = Contact.query.filter_by(user_id=current_user.id).all()
+    return render_template('share.html', form=form, contacts=contacts)
 @main.route('/profile')
 @login_required
 def profile():

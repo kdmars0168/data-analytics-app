@@ -5,9 +5,10 @@ from app.forms import RegistrationForm, LoginForm
 from app.models import User
 from flask_login import login_user, logout_user, login_required,current_user
 from app.utils import generate_analysis_summary
-from app.forms import EditProfileForm
-from app.models import User 
+from app.forms import EditProfileForm 
+from app.models import User, Contact 
 from datetime import datetime
+from app.forms import ContactForm
 
 # Create a Blueprint called 'main'
 main = Blueprint('main', __name__)
@@ -101,11 +102,34 @@ def submit_manual():
     flash('Manual data submitted successfully!', 'success')
     return redirect(url_for('main.upload')) 
 
-# Share page
-@main.route('/share')
+@main.route('/share', methods=['GET', 'POST'])
 @login_required
 def share():
-    return render_template('share.html')  # (create share.html later even if empty for now)
+    form = ContactForm()
+
+    if form.validate_on_submit():
+        # Check if the contact already exists for this user
+        existing_contact = Contact.query.filter_by(name=form.name.data, user_id=current_user.id).first()
+
+        if existing_contact:
+            flash('Contact name already exists.', 'danger')
+        else:
+            # Create and add the new contact
+            contact = Contact(
+                name=form.name.data,
+                email=form.email.data,
+                user_id=current_user.id 
+            )
+            db.session.add(contact)
+            db.session.commit()
+            flash('Contact added!', 'success')
+
+        return redirect(url_for('main.share'))
+
+   
+    contacts = Contact.query.filter_by(user_id=current_user.id).all()
+
+    return render_template('share.html', form=form, contacts=contacts)
 @main.route('/profile')
 @login_required
 def profile():

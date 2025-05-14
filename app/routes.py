@@ -19,10 +19,15 @@ main = Blueprint('main', __name__)
 
 @main.route('/')
 def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
     return render_template('index.html')
 
 @main.route('/register', methods=['GET', 'POST'])
 def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))  # Redirect if already logged in
+
     form = RegistrationForm()
     if form.validate_on_submit():
         existing_user = User.query.filter_by(email=form.email.data).first()
@@ -30,12 +35,14 @@ def register():
             flash('Email address is already in use. Please choose a different one.', 'danger')
             return redirect(url_for('main.register'))
 
-        # If email does not exist, create the new user
-        user = User(name=form.name.data, email=form.email.data, gender=form.gender.data,
-    dob=form.dob.data,
-    height=form.height.data,
-    weight=form.weight.data,
-    medical_conditions=form.medical_conditions.data
+        user = User(
+            name=form.name.data,
+            email=form.email.data,
+            gender=form.gender.data,
+            dob=form.dob.data,
+            height=form.height.data,
+            weight=form.weight.data,
+            medical_conditions=form.medical_conditions.data
         )
         user.set_password(form.password.data)
         db.session.add(user)
@@ -47,6 +54,9 @@ def register():
 
 @main.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))  # Redirect if already logged in
+
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
@@ -56,6 +66,7 @@ def login():
             return redirect(url_for('main.dashboard'))
         else:
             flash('Invalid credentials. Please try again.', 'danger')
+
     return render_template('login.html', form=form)
 
 @main.route('/dashboard')

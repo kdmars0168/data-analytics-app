@@ -13,6 +13,8 @@ from collections import defaultdict
 from statistics import mean
 from app.forms import EditProfileForm, ContactForm
 from app.models import User, Contact
+from app.models import  PersonalizedMessage
+from app.forms import PersonalizedMessageForm
 
 # Create a Blueprint called 'main'
 main = Blueprint('main', __name__)
@@ -197,34 +199,28 @@ def submit_manual():
     )
     db.session.add(record)
     db.session.commit()
-    flash('Data saved!', 'success')
-    return redirect(url_for('main.upload'))
-
-@main.route('/submit_manual', methods=['POST'])
-@login_required
-def submit_manual():
-    date = request.form['date']
-    steps = request.form['steps']
-    sleep = request.form['sleep']
-    mood = request.form['mood']
-
-    record = HealthRecord(
-        user_id=current_user.id,
-        date=datetime.strptime(date, '%Y-%m-%d').date(),
-        steps=int(steps),
-        sleep_hours=float(sleep),
-        mood=int(mood)
-    )
-    db.session.add(record)
-    db.session.commit()
     flash('Manual data submitted successfully!', 'success')
     return redirect(url_for('main.upload'))
+
 
 
 @main.route('/share', methods=['GET', 'POST'])
 @login_required
 def share():
     form = ContactForm()
+    if request.is_json:
+        data = request.get_json()
+        message_text = data.get('message')
+
+        if message_text is not None:
+            existing_msg = PersonalizedMessage.query.filter_by(user_id=current_user.id).first()
+            if existing_msg:
+                existing_msg.message = message_text
+            else:
+                new_msg = PersonalizedMessage(user_id=current_user.id, message=message_text)
+                db.session.add(new_msg)
+            db.session.commit()
+        return jsonify({'status': 'saved'})
 
     if form.validate_on_submit():
         existing_contact = Contact.query.filter_by(name=form.name.data, user_id=current_user.id).first()
@@ -243,6 +239,8 @@ def share():
         return redirect(url_for('main.share'))
 
     contacts = Contact.query.filter_by(user_id=current_user.id).all()
+    existing_msg = PersonalizedMessage.query.filter_by(user_id=current_user.id).first()
+    message_text = existing_msg.message if existing_msg else ''
     return render_template('share.html', form=form, contacts=contacts)
 @main.route('/profile')
 @login_required
@@ -285,3 +283,17 @@ def save_profile():
         db.session.rollback()
         flash('An error occurred while saving your profile: ' + str(e), 'error')
         return redirect(url_for('main.profile'))
+@main.route('/save_message', methods=['POST'])
+@login_required
+def save_message():
+    data = request.get_json() 
+    message_text = data.get('message')  
+    if message_text is not None:
+        existing_msg = PersonalizedMessage.query.filter_by(user_id=current_user.id).first()
+        if existing_msg:
+            existing_msg.message = message_text 
+        else:
+            new_msg = PersonalizedMessage(user_id=current_user.id, message=message_text)  # 没有就新建
+            db.session.add(new_msg)
+        db.session.commit()
+    return jsonify({'status': 'saved'})  

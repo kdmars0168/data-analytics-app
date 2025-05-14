@@ -41,3 +41,5 @@ class ContactForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Add Contact')
+class PersonalizedMessageForm(FlaskForm):
+     message = TextAreaField('Personalized Message (Optional)')

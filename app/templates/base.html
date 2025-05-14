@@ -24,11 +24,11 @@
         font-family: 'Poppins', sans-serif;
       }
     </style>
-
+  
     <link
       href="{{ url_for('static', filename='css/styles.css') }}"
-      rel="stylesheet"
-    />
+      rel="stylesheet"/>
+    {% block head %}{% endblock %}
   </head>
 
   <body class="bg-gray-50 text-gray-800 min-h-screen flex flex-col">

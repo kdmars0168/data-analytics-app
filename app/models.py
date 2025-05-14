@@ -69,3 +69,12 @@ class Contact(db.Model):
 
     def __repr__(self):
         return f"<Contact {self.name}>"
+class PersonalizedMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True) 
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  
+    message = db.Column(db.Text, nullable=True)  
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp()) 
+    user = db.relationship('User', backref='personalized_messages', lazy=True)
+
+    def __repr__(self):
+        return f'<PersonalizedMessage {self.id} from user {self.user_id}>'

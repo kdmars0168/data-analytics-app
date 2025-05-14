@@ -1,81 +1,61 @@
 {% extends 'base.html' %}
 
 {% block title %}Profile | DataWhisper{% endblock %}
-
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
 {% block content %}
-<section class="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full space-y-8">
-    <div class="text-center">
-      <div class="flex justify-center mb-4">
-        <div class="flex items-center space-x-2">
-          <i class="fas fa-user-circle text-purple-600 text-4xl"></i>
-          <h2 class="text-3xl font-extrabold text-gray-900">Your Profile</h2>
-        </div>
-      </div>
-      <p class="text-gray-500 text-sm">View and manage your personal information</p>
-    </div>
-
-    <div class="bg-white p-8 shadow rounded-lg space-y-4">
-      <div class="text-left space-y-2">
-        <form method="POST" action="{{ url_for('main.save_profile') }}">
+<section class="profile-section">
+  <div class="profile-container">
+    <div class="profile-card">
+      <h2 class="text-center text-3xl font-extrabold text-gray-900 mb-6">Your Profile</h2>
+      <form method="POST" action="{{ url_for('main.save_profile') }}">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="name" class="form-label">Name:</label>
+            <input type="text" name="name" id="name" value="{{ user.name }}" class="form-input" required>
+          </div>
           
-          <!-- Name Field -->
           <div class="form-group">
-            <label for="name" class="text-gray-700 font-semibold">Name:</label>
-            <input type="text" name="name" id="name" value="{{ user.name }}" class="form-control" required>
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" name="email" id="email" value="{{ user.email }}" class="form-input" required>
           </div>
 
-          <!-- Email Field -->
           <div class="form-group">
-            <label for="email" class="text-gray-700 font-semibold">Email:</label>
-            <input type="email" name="email" id="email" value="{{ user.email }}" class="form-control" required>
+            <label for="gender" class="form-label">Gender:</label>
+            <input type="text" name="gender" id="gender" value="{{ user.gender }}" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label for="dob" class="form-label">Date of Birth:</label>
+            <input type="date" name="dob" id="dob" value="{{ user.dob }}" class="form-input">
           </div>
 
-          <!-- Gender Field -->
           <div class="form-group">
-            <label for="gender" class="text-gray-700 font-semibold">Gender:</label>
-            <input type="text" name="gender" id="gender" value="{{ user.gender }}" class="form-control">
+            <label for="height" class="form-label">Height (cm):</label>
+            <input type="text" name="height" id="height" value="{{ user.height }}" class="form-input">
           </div>
 
-          <!-- Date of Birth (dob) Field -->
           <div class="form-group">
-            <label for="dob" class="text-gray-700 font-semibold">Date of Birth:</label>
-            <input type="date" name="dob" id="dob" value="{{ user.dob }}" class="form-control">
+            <label for="weight" class="form-label">Weight (kg):</label>
+            <input type="text" name="weight" id="weight" value="{{ user.weight }}" class="form-input">
           </div>
 
-          <!-- Height Field -->
-          <div class="form-group">
-            <label for="height" class="text-gray-700 font-semibold">Height (cm):</label>
-            <input type="text" name="height" id="height" value="{{ user.height }}" class="form-control">
-          </div>
-
-          <!-- Weight Field -->
-          <div class="form-group">
-            <label for="weight" class="text-gray-700 font-semibold">Weight (kg):</label>
-            <input type="text" name="weight" id="weight" value="{{ user.weight }}" class="form-control">
-          </div>
-
-          <!-- Medical Conditions Field -->
-          <div class="form-group">
-            <label for="medical_conditions" class="block text-gray-700 font-semibold mb-1">Medical Conditions:</label>
+          <div class="form-group full-width">
+            <label for="medical_conditions" class="form-label">Medical Conditions:</label>
             <textarea name="medical_conditions"
                       id="medical_conditions"
-                      class="block w-full max-w-sm px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 text-sm resize-none"
+                      class="form-textarea"
                       rows="2"
                       placeholder="e.g. Diabetes, Hypertension">{{ user.medical_conditions }}</textarea>
           </div>
+        </div>
 
-          <!-- Save and Cancel Buttons -->
-          <div class="flex justify-between items-center pt-4">
-            <button type="submit" class="w-1/2 py-2 px-4 border border-transparent rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 font-semibold">
-              Save
-            </button>
-            <a href="{{ url_for('main.profile') }}" class="w-1/2 py-2 px-4 text-center border border-transparent rounded-md shadow-sm text-white bg-gray-500 hover:bg-gray-600 font-semibold">
-              Cancel
-            </a>
-          </div>
-        </form>
-      </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Save</button>
+          <a href="{{ url_for('main.profile') }}" class="btn-secondary">Cancel</a>
+        </div>
+      </form>
     </div>
   </div>
 </section>

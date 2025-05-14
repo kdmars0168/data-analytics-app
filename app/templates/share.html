@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Share Your Data</title>
     <link rel="stylesheet" href="static/css/sharestyles.css">
-
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
+<script src="{{ url_for('static', filename='js/share.js') }}"></script>
+
 <body>
 
 <div class="main-content">
@@ -84,16 +86,16 @@
 
     <div class="form-group mb-3">
         {{ form.name.label }}
-        {{ form.name(style="width: 100%; height: 40px;", placeholder='Enter name', class="form-control") }}
+        {{ form.name(placeholder='Enter name', class="form-control") }}
     </div>
 
     <div class="form-group mb-3">
         {{ form.email.label }}
-        {{ form.email(style="width: 100%; height: 40px;", placeholder='Enter email', class="form-control") }}
+        {{ form.email(placeholder='Enter email', class="form-control") }}
     </div>
 
     <div class="form-group">
-        {{ form.submit(class="btn btn-primary btn-add btn-lg", style="width: 100%; height: 40px;") }}
+        {{ form.submit(class="btn btn-primary btn-add btn-lg") }}
     </div>
 </form>
 
@@ -102,9 +104,11 @@
     <h3 class="contacts-heading">Your Contacts</h3>
     <ul class="selection-list contact-list">
         {% for contact in contacts %}
-            <li>
-                <span class="contact-name">{{ contact.name }}</span> - 
-                <span class="contact-email">{{ contact.email }}</span>
+            <li class="flex items-center">
+                <input type="checkbox" id="contact-{{ contact.id }}" class="mr-2">
+                <label for="contact-{{ contact.id }}" class="contact-name">
+                    {{ contact.name }} - <span class="contact-email">{{ contact.email }}</span>
+                </label>
             </li>
         {% else %}
             <li>No contacts added yet.</li>
@@ -115,7 +119,7 @@
                 <!-- Personalized Message Section -->
                 <section class="content-section">
                     <label for="personalized-message" class="message-label">Personalized Message (Optional)</label>
-                    <textarea id="personalized-message" rows="3" placeholder="I'd like to share my data insights with you. Check out these visualizations."></textarea>
+                    <textarea id="personalized-message" rows="3" placeholder="I'd like to share my data insights with you.">{{ message_text }}</textarea>
                 </section>
 
                  <!-- Share Actions Footer -->

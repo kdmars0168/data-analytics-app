@@ -197,26 +197,6 @@ def submit_manual():
     )
     db.session.add(record)
     db.session.commit()
-    flash('Data saved!', 'success')
-    return redirect(url_for('main.upload'))
-
-@main.route('/submit_manual', methods=['POST'])
-@login_required
-def submit_manual():
-    date = request.form['date']
-    steps = request.form['steps']
-    sleep = request.form['sleep']
-    mood = request.form['mood']
-
-    record = HealthRecord(
-        user_id=current_user.id,
-        date=datetime.strptime(date, '%Y-%m-%d').date(),
-        steps=int(steps),
-        sleep_hours=float(sleep),
-        mood=int(mood)
-    )
-    db.session.add(record)
-    db.session.commit()
     flash('Manual data submitted successfully!', 'success')
     return redirect(url_for('main.upload'))
 

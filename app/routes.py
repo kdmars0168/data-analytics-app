@@ -87,6 +87,7 @@ def dashboard():
             "mood_correlation": "No data uploaded yet.",
             "recommendations": "Upload data to see insights."
         }
+        mood_distribution = {}
         summary = {
             "average_steps": 0,
             "sleep_quality": 0,
@@ -127,6 +128,35 @@ def dashboard():
         }
 
         analysis = generate_analysis_summary(chart_data["daily"])
+        # Compute mood percentage distribution for each timeframe
+        def calculate_mood_distribution(records):
+            mood_counts = defaultdict(int)
+            valid_moods = {0: "Sad", 1: "Stressed", 2: "Tired", 4: "Happy"}
+            for r in records:
+                if r.mood in valid_moods:
+                    mood_counts[valid_moods[r.mood]] += 1
+            total = sum(mood_counts.values())
+            return {
+                mood: round((count / total) * 100, 2)
+                for mood, count in mood_counts.items()
+            } if total > 0 else {}
+
+        # Helper: Reduce mood by recent N periods
+        def reduce_mood(group_dict, limit=None):
+            items = list(group_dict.items())
+            items.sort(key=lambda x: x[0])
+            if limit:
+                items = items[-limit:]
+            records = [r for _, v in items for r in v]
+            return calculate_mood_distribution(records)
+
+        mood_distribution = {
+            "daily": reduce_mood(grouped["daily"], limit=7),
+            "weekly": reduce_mood(grouped["weekly"], limit=6),
+            "monthly": reduce_mood(grouped["monthly"], limit=6),
+            "yearly": reduce_mood(grouped["yearly"])  # no limit
+        }
+
         summary = {
             "average_steps": int(mean([r.steps for r in records])),
             "sleep_quality": round(mean([r.sleep_hours for r in records]), 1),
@@ -138,7 +168,8 @@ def dashboard():
         "dashboard.html",
         chart_data=json.dumps(chart_data),
         analysis=analysis,
-        summary=summary
+        summary=summary,
+        mood_distribution=json.dumps(mood_distribution)
     )
 
 @main.route('/logout', methods=['POST'])
@@ -164,17 +195,31 @@ def upload():
                 count = 0
                 for row in reader:
                     try:
+                        # Get mood value as string
+                        mood_raw = row['mood'].strip()
+
+                        # Mapping from mood string to number
+                        MOOD_MAP = {"Sad": 0, "Stressed": 1, "Tired": 2, "Neutral": 3, "Happy": 4}
+
+                        # Try to convert mood to int (if already a number), otherwise map it
+                        try:
+                            mood = int(mood_raw)
+                        except ValueError:
+                            mood = MOOD_MAP.get(mood_raw, 3)  # default to Neutral if unrecognized
+
+                        # Now safely create and save the record
                         record = HealthRecord(
                             user_id=current_user.id,
                             date=datetime.strptime(row['date'].strip(), "%Y-%m-%d").date(),
                             steps=int(row['steps'].strip()),
                             sleep_hours=float(row['sleep_hours'].strip()),
-                            mood=int(row['mood'].strip()),
+                            mood=mood
                         )
                         db.session.add(record)
                         count += 1
+
                     except Exception as e:
-                        print(f"Skipping row due to error: {e}")
+                        print(f"[UPLOAD ERROR] Skipping row: {row} — Error: {e}")
                 db.session.commit()
                 print(f"[DEBUG] Uploaded {count} records for user ID {current_user.id}")
 
@@ -197,14 +242,26 @@ def submit_manual():
     date = request.form['date']
     steps = request.form['steps']
     sleep = request.form['sleep']
-    mood = request.form['mood']
+    mood_text = request.form['mood']
+
+    # Define mood-to-int mapping
+    MOOD_MAP = {
+        "Sad": 0,
+        "Stressed": 1,
+        "Tired": 2,
+        "Neutral": 3,
+        "Happy": 4
+    }
+
+    # Convert to numeric value
+    mood = MOOD_MAP.get(mood_text, 3)  # Defaults to 'Neutral'
 
     record = HealthRecord(
         user_id=current_user.id,
         date=datetime.strptime(date, '%Y-%m-%d').date(),
         steps=int(steps),
         sleep_hours=float(sleep),
-        mood=int(mood)
+        mood=mood
     )
     db.session.add(record)
     db.session.commit()

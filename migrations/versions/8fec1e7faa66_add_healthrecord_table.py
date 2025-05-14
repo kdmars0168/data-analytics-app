@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '8fec1e7faa66'
-down_revision = 'efe46465445d'
+down_revision = '7102e1b6eaa8'
 branch_labels = None
 depends_on = None
 
@@ -29,7 +29,7 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     with op.batch_alter_table('shared_data', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('shared_at', sa.DateTime(), nullable=True))
+        #batch_op.add_column(sa.Column('shared_at', sa.DateTime(), nullable=True))
         batch_op.add_column(sa.Column('status', sa.String(length=50), nullable=True))
 
     with op.batch_alter_table('uploaded_data', schema=None) as batch_op:
@@ -44,7 +44,7 @@ def downgrade():
         batch_op.drop_column('file_path')
 
     with op.batch_alter_table('shared_data', schema=None) as batch_op:
-        batch_op.drop_column('status')
+       # batch_op.drop_column('status')
         batch_op.drop_column('shared_at')
 
     op.drop_table('health_record')

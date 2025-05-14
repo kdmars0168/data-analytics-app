@@ -157,11 +157,22 @@ def dashboard():
             "yearly": reduce_mood(grouped["yearly"])  # no limit
         }
 
+        # Trend score formula: weighted average of normalized steps, sleep, and mood
+        def calculate_trend_score(records):
+            if not records:
+                return 0
+            steps_scores = [min(r.steps / 10000, 1) for r in records]  # Normalize to 10k steps
+            sleep_scores = [min(r.sleep_hours / 8, 1) for r in records]  # Normalize to 8h sleep
+            mood_scores = [r.mood / 4 for r in records]  # Normalize mood from 0–4
+
+            weighted = [0.4 * s + 0.3 * sl + 0.3 * m for s, sl, m in zip(steps_scores, sleep_scores, mood_scores)]
+            return round(mean(weighted) * 100, 1)
+
         summary = {
             "average_steps": int(mean([r.steps for r in records])),
-            "sleep_quality": round(mean([r.sleep_hours for r in records]), 1),
+            "sleep_quality": round(mean([r.sleep_hours for r in records]), 1),  
             "average_mood": round(mean([r.mood for r in records]), 1),
-            "trend_score": 87  # Placeholder for real trend logic
+            "trend_score": calculate_trend_score(records)
         }
 
     return render_template(

@@ -30,7 +30,7 @@ def upgrade():
     )
     with op.batch_alter_table('shared_data', schema=None) as batch_op:
         #batch_op.add_column(sa.Column('shared_at', sa.DateTime(), nullable=True))
-        batch_op.add_column(sa.Column('status', sa.String(length=50), nullable=True))
+        #batch_op.add_column(sa.Column('status', sa.String(length=50), nullable=True))
 
     with op.batch_alter_table('uploaded_data', schema=None) as batch_op:
         batch_op.add_column(sa.Column('file_path', sa.String(length=512), nullable=False))
@@ -45,7 +45,7 @@ def downgrade():
 
     with op.batch_alter_table('shared_data', schema=None) as batch_op:
        # batch_op.drop_column('status')
-        batch_op.drop_column('shared_at')
+        #batch_op.drop_column('shared_at')
 
     op.drop_table('health_record')
     # ### end Alembic commands ###

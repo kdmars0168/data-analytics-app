@@ -69,3 +69,8 @@ class Contact(db.Model):
 
     def __repr__(self):
         return f"<Contact {self.name}>"
+
+class Dataset(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(128))
+    chart_type = db.Column(db.String(32))

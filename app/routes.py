@@ -1,5 +1,5 @@
 import os, json
-from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify, send_from_directory, current_app
+from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify, send_from_directory, current_app, session
 from app import db
 from app.forms import RegistrationForm, LoginForm, EditProfileForm
 from app.models import User, UploadedData, SharedData, HealthRecord
@@ -12,7 +12,7 @@ from werkzeug.utils import secure_filename
 from collections import defaultdict
 from statistics import mean
 from app.forms import EditProfileForm, ContactForm
-from app.models import User, Contact
+from app.models import User, Contact, SharedData, Dataset
 
 # Create a Blueprint called 'main'
 main = Blueprint('main', __name__)
@@ -224,6 +224,30 @@ def share():
 
     contacts = Contact.query.filter_by(user_id=current_user.id).all()
     return render_template('share.html', form=form, contacts=contacts)
+
+@main.route('/shared-with-me', methods=['GET', 'POST'])
+def shared_with_me():
+    current_user_id = session.get('user_id')
+    # Query users who have shared data with the current user
+    shared_users = (
+        User.query
+        .join(SharedData, SharedData.owner_id == User.id)
+        .filter(SharedData.shared_with_id == current_user_id)
+        .all()
+    )
+    # Query datasets shared with the current user
+    shared_datasets = (
+        Dataset.query
+        .join(SharedData, SharedData.dataset_id == Dataset.id)
+        .filter(SharedData.shared_with_id == current_user_id)
+        .all()
+    )
+    return render_template(
+        'shared_with_me.html',
+        shared_users=shared_users,
+        shared_datasets=shared_datasets
+    )
+
 @main.route('/profile')
 @login_required
 def profile():

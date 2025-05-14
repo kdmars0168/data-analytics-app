@@ -1,87 +1,179 @@
-{% extends "base.html" %}
-
-{% block title %}Upload Data - HealthWhisper{% endblock %}
-
-{% block content %}
+{% extends "base.html" %} {% block title %}Upload Data - HealthWhisper{%
+endblock %} {% block content %}
 <div class="max-w-4xl mx-auto mt-10">
   <div class="mb-8">
-    <h1 class="text-4xl font-bold text-center mb-4 text-gray-900">Upload Your Data</h1>
-    <p class="text-center text-lg text-gray-600">Add your personal data to visualize trends and patterns.</p>
+    <h1 class="text-4xl font-bold text-center mb-4 text-gray-900">
+      Upload Your Data
+    </h1>
+    <p class="text-center text-lg text-gray-600">
+      Add your personal data to visualize trends and patterns.
+    </p>
   </div>
 
   <div class="space-y-6">
     <div class="grid w-full grid-cols-2 mb-4 gap-4">
-      <button class="tab-trigger text-xl font-medium py-2 px-4 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors" data-tab="file">File Upload</button>
-      <button class="tab-trigger text-xl font-medium py-2 px-4 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors" data-tab="manual">Manual Entry</button>
+      <button
+        class="tab-trigger text-xl font-medium py-2 px-4 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+        data-tab="file"
+      >
+        File Upload
+      </button>
+      <button
+        class="tab-trigger text-xl font-medium py-2 px-4 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors"
+        data-tab="manual"
+      >
+        Manual Entry
+      </button>
     </div>
 
     <!-- File Upload Tab -->
     <div class="tab-content" id="file-tab">
       <div class="bg-white shadow-lg rounded-lg p-6">
-        <h2 class="text-2xl font-semibold mb-2 text-gray-800">Upload CSV File</h2>
-        <p class="text-gray-600 mb-4">Upload your data in CSV format for analysis. Ensure your file includes: date, steps, sleep_hours, and mood columns.</p>
+        <h2 class="text-2xl font-semibold mb-2 text-gray-800">
+          Upload CSV File
+        </h2>
+        <p class="text-gray-600 mb-4">
+          Upload your data in CSV format for analysis. Ensure your file
+          includes: date, steps, sleep_hours, and mood columns.
+        </p>
 
-        <div class="alert alert-info mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div
+          class="alert alert-info mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg"
+        >
           <i class="icon-alert-circle text-blue-500 mr-2"></i>
           <strong class="text-blue-700">Import Format</strong>
-          <p class="text-sm text-gray-700">Your CSV should include: date, steps, sleep_hours, and mood columns.</p>
+          <p class="text-sm text-gray-700">
+            Your CSV should include: date, steps, sleep_hours, and mood columns.
+          </p>
         </div>
 
-        <form method="post" enctype="multipart/form-data" action="{{ url_for('main.upload') }}">
-          <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer">
-            <input type="file" name="file" accept=".csv" id="file-upload" class="hidden" />
-            <label for="file-upload" class="w-full h-full flex flex-col items-center justify-center cursor-pointer text-center">
+        <form
+          method="post"
+          enctype="multipart/form-data"
+          action="{{ url_for('main.upload') }}"
+        >
+          <div
+            class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer"
+          >
+            <input
+              type="file"
+              name="file"
+              accept=".csv"
+              id="file-upload"
+              class="hidden"
+            />
+            <label
+              for="file-upload"
+              class="w-full h-full flex flex-col items-center justify-center cursor-pointer text-center"
+            >
               <i class="icon-file-text h-12 w-12 text-gray-500 mb-4"></i>
-              <p class="text-lg font-medium text-gray-600">Click to select a CSV file</p>
+              <p class="text-lg font-medium text-gray-600">
+                Click to select a CSV file
+              </p>
               <p class="text-sm text-gray-500">or drag and drop</p>
             </label>
+
+            <!-- File preview will appear here -->
+            <div
+              id="file-preview"
+              class="mt-4 hidden flex items-center justify-center flex-col text-sm text-gray-700"
+            >
+              <i class="fas fa-file-csv text-2xl mb-1 text-purple-500"></i>
+              <span id="selected-filename"></span>
+            </div>
           </div>
 
           <div class="flex justify-end mt-6">
-            <button class="btn btn-primary py-2 px-6 text-white font-semibold rounded-md bg-indigo-600 hover:bg-indigo-700 transition-colors" type="submit">
+            <button
+              class="btn btn-primary py-2 px-6 text-white font-semibold rounded-md bg-indigo-600 hover:bg-indigo-700 transition-colors"
+              type="submit"
+            >
               <i class="icon-upload mr-2 h-4 w-4"></i> Upload Data
             </button>
           </div>
         </form>
 
-        {# 
-          <div class="text-center text-xs text-gray-500 mt-4">
-            <p>
-              Prefer to use a template? <a href="{{ url_for('main.download_template') }}" class="text-indigo-600 hover:text-indigo-800">Download template CSV</a>
-            </p>
-          </div>
-          #}
+        <div class="text-center text-xs text-gray-500 mt-4">
+          <p>
+            Prefer to use a template?
+            <a
+              href="{{ url_for('main.download_template') }}"
+              class="text-indigo-600 hover:text-indigo-800"
+            >
+              Download template CSV
+            </a>
+          </p>
+        </div>
       </div>
     </div>
 
     <!-- Manual Entry Tab -->
     <div class="tab-content hidden" id="manual-tab">
       <div class="bg-white shadow-lg rounded-lg p-6">
-        <h2 class="text-2xl font-semibold mb-2 text-gray-800">Manual Data Entry</h2>
-        <p class="text-gray-600 mb-4">Enter your personal data for a specific day manually.</p>
+        <h2 class="text-2xl font-semibold mb-2 text-gray-800">
+          Manual Data Entry
+        </h2>
+        <p class="text-gray-600 mb-4">
+          Enter your personal data for a specific day manually.
+        </p>
 
         <form method="post" action="{{ url_for('main.submit_manual') }}">
           <div class="space-y-4">
             <div class="form-item">
               <label class="form-label text-lg text-gray-700">Date</label>
-              <input type="date" name="date" class="form-control w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600" value="{{ current_date }}" required />
+              <input
+                type="date"
+                name="date"
+                class="form-control w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                value="{{ current_date }}"
+                required
+              />
             </div>
             <div class="grid grid-cols-2 gap-4">
               <div class="form-item">
                 <label class="form-label text-lg text-gray-700">Steps</label>
-                <input type="number" name="steps" class="form-control w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600" min="0" placeholder="8000" required />
+                <input
+                  type="number"
+                  name="steps"
+                  class="form-control w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  min="0"
+                  placeholder="8000"
+                  required
+                />
               </div>
               <div class="form-item">
-                <label class="form-label text-lg text-gray-700">Sleep (hours)</label>
-                <input type="number" name="sleep" class="form-control w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600" min="0" max="24" step="0.5" placeholder="7.5" required />
+                <label class="form-label text-lg text-gray-700"
+                  >Sleep (hours)</label
+                >
+                <input
+                  type="number"
+                  name="sleep"
+                  class="form-control w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                  min="0"
+                  max="24"
+                  step="0.5"
+                  placeholder="7.5"
+                  required
+                />
               </div>
             </div>
             <div class="form-item">
               <label class="form-label text-lg text-gray-700">Mood</label>
-              <input type="text" name="mood" class="form-control w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600" placeholder="Happy" required />
+              <input
+                type="text"
+                name="mood"
+                class="form-control w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                placeholder="Happy"
+                required
+              />
             </div>
             <div class="flex justify-end mt-6">
-              <button class="btn btn-primary py-2 px-6 text-white font-semibold rounded-md bg-indigo-600 hover:bg-indigo-700 transition-colors" type="submit">Save Data</button>
+              <button
+                class="btn btn-primary py-2 px-6 text-white font-semibold rounded-md bg-indigo-600 hover:bg-indigo-700 transition-colors"
+                type="submit"
+              >
+                Save Data
+              </button>
             </div>
           </div>
         </form>
@@ -91,14 +183,16 @@
 </div>
 
 <script>
-// Simple tab switching logic
-document.querySelectorAll('.tab-trigger').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const tab = btn.dataset.tab;
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-    document.getElementById(`${tab}-tab`).classList.remove('hidden');
+  // Simple tab switching logic
+  document.querySelectorAll('.tab-trigger').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.tab;
+      document
+        .querySelectorAll('.tab-content')
+        .forEach((c) => c.classList.add('hidden'));
+      document.getElementById(`${tab}-tab`).classList.remove('hidden');
+    });
   });
-});
 </script>
 <script>
   // Get chart data from backend
@@ -106,4 +200,5 @@ document.querySelectorAll('.tab-trigger').forEach(btn => {
   // Use chartData instead of dummyData in your dashboard.js
 </script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/upload.js') }}"></script>
 {% endblock %}

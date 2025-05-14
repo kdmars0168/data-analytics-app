@@ -31,91 +31,101 @@
 
             <!-- Share Data Tab Content -->
             <div id="share-data-content" class="tab-pane active">
+                <form method="POST" class="share-form">
+                    {{ form.hidden_tag() }}
+
                 <section class="content-section">
                     <h2>Select Visualizations to Share</h2>
                     <p class="section-subtitle">Choose which charts and insights you want to share</p>
                     <ul class="selection-list visualization-list">
                         <li>
                             <label for="viz1">
-                                <input type="checkbox" id="viz1">
+                                <input type="checkbox" name="selected_dataset_ids" id="viz1" value="steps">
                                 <span class="item-details">
                                     <span class="item-name">Weekly Step Count</span>
-                                    <span class="item-meta">Bar Chart - Created 2025-04-05</span>
+                                    <span class="item-meta">Bar Chart</span>
                                 </span>
                             </label>
                         </li>
-                        <li>
+                         <li>
                             
                             <label for="viz2">
-                                <input type="checkbox" id="viz2">
+                                <input type="checkbox"  name="selected_dataset_ids" id="viz2" value="sleep">
                                 <span class="item-details">
                                     <span class="item-name">Sleep Patterns</span>
-                                    <span class="item-meta">Line Chart - Created 2025-04-08</span>
+                                    <span class="item-meta">Line Chart</span>
                                 </span>
                             </label>
                         </li>
                          <li>
                             <label for="viz3">
-                                <input type="checkbox" id="viz3">
+                                <input type="checkbox"  name="selected_dataset_ids" id="viz3" value="mood">
                                 <span class="item-details">
                                     <span class="item-name">Mood Distribution</span>
-                                    <span class="item-meta">Pie Chart - Created 2025-04-12</span>
+                                    <span class="item-meta">Pie Chart</span>
                                 </span>
                             </label>
                         </li>
-                         <li>
+                        <li>
                             <label for="viz4">
-                                <input type="checkbox" id="viz4">
+                                <input type="checkbox"  name="selected_dataset_ids" id="viz4" value="sleep_vs_mood">
                                 <span class="item-details">
                                     <span class="item-name">Sleep vs Mood</span>
-                                    <span class="item-meta">Line Chart - Created 2025-04-15</span>
+                                    <span class="item-meta">Line Chart</span>
                                 </span>
                             </label>
                         </li>
                     </ul>
                 </section>
 
-               <section class="content-section">
-        <h2>Select Recipients</h2>
-    <p class="section-subtitle">Choose people to share your selected visualizations with</p>
+                <section class="content-section">
+                    <h2>Select Recipient</h2>
+                    <p class="section-subtitle">Choose a contact or add a new one to share your selected visualizations with</p>
+                    <div class="form-group mb-3">
+                        <label for="selected_contact_id">Contact</label>
+                        <select name="selected_contact_id" id="selected_contact_id" class="form-control" required onchange="toggleNewContactInput(this)">
+                            <option value="" disabled selected>Select a contact</option>
+                            {% for contact in contacts %}
+                            <option value="{{ contact.id }}">{{ contact.name }} ({{ contact.email }})</option>
+                            {% endfor %}
+                            <option value="add_new">Add new contact by email...</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-3" id="new-contact-fields" style="display:none;">
+                        <label for="new_contact_name">Name</label>
+                        <input type="text" name="new_contact_name" id="new_contact_name" class="form-control" placeholder="Enter name">
+                        <label for="new_contact_email">Email</label>
+                        <input type="email" name="new_contact_email" id="new_contact_email" class="form-control" placeholder="Enter email">
+                    </div>
+                    <ul>
+                        {% for contact in contacts %}
+                        <li>
+                            <strong>{{ contact.name }}</strong> ({{ contact.email }})
+                        </li>
+                        {% else %}
+                        <li>No contacts found.</li>
+                        {% endfor %}
+                    </ul>
+                    </div>
+                </section>
+                <script>
+                    function toggleNewContactInput(select) {
+                        const newFields = document.getElementById('new-contact-fields');
+                        if (select.value === 'add_new') {
+                            newFields.style.display = 'block';
+                            document.getElementById('new_contact_name').required = true;
+                            document.getElementById('new_contact_email').required = true;
+                        } else {
+                            newFields.style.display = 'none';
+                            document.getElementById('new_contact_name').required = false;
+                            document.getElementById('new_contact_email').required = false;
+                        }
+                    }
+                </script>
 
-    <form method="POST" class="add-recipient-form">
-    {{ form.hidden_tag() }}
-
-    <div class="form-group mb-3">
-        {{ form.name.label }}
-        {{ form.name(style="width: 100%; height: 40px;", placeholder='Enter name', class="form-control") }}
-    </div>
-
-    <div class="form-group mb-3">
-        {{ form.email.label }}
-        {{ form.email(style="width: 100%; height: 40px;", placeholder='Enter email', class="form-control") }}
-    </div>
-
-    <div class="form-group">
-        {{ form.submit(class="btn btn-primary btn-add btn-lg", style="width: 100%; height: 40px;") }}
-    </div>
-</form>
-
-
-
-    <h3 class="contacts-heading">Your Contacts</h3>
-    <ul class="selection-list contact-list">
-        {% for contact in contacts %}
-            <li>
-                <span class="contact-name">{{ contact.name }}</span> - 
-                <span class="contact-email">{{ contact.email }}</span>
-            </li>
-        {% else %}
-            <li>No contacts added yet.</li>
-        {% endfor %}
-    </ul>
-</section>
-
-                <!-- Personalized Message Section -->
                 <section class="content-section">
                     <label for="personalized-message" class="message-label">Personalized Message (Optional)</label>
-                    <textarea id="personalized-message" rows="3" placeholder="I'd like to share my data insights with you. Check out these visualizations."></textarea>
+                    <textarea id="personalized-message" name="personalized_message" rows="3" placeholder="I'd like to share my data insights with you. Check out these visualizations."></textarea>
                 </section>
 
                  <!-- Share Actions Footer -->

@@ -2,7 +2,7 @@ import os, json
 from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify, send_from_directory, current_app, session
 from app import db
 from app.forms import RegistrationForm, LoginForm, EditProfileForm
-from app.models import User, UploadedData, SharedData, HealthRecord
+from app.models import User, UploadedData, SharedData, HealthRecord, SharedChart
 from flask_login import login_user, logout_user, login_required, current_user
 from app.utils import generate_analysis_summary
 from sqlalchemy import extract
@@ -205,47 +205,75 @@ def submit_manual():
 @login_required
 def share():
     form = ContactForm()
+    contacts = Contact.query.filter_by(user_id=current_user.id).all()
 
-    if form.validate_on_submit():
-        existing_contact = Contact.query.filter_by(name=form.name.data, user_id=current_user.id).first()
-        if existing_contact:
-            flash('Contact name already exists.', 'danger')
-        else:
-            contact = Contact(
-                name=form.name.data,
-                email=form.email.data,
-                user_id=current_user.id 
+    dataset_value_to_id = {
+        "steps": 1,
+        "sleep": 2,
+        "mood": 3,
+        "sleep_vs_mood": 4
+    }
+
+    if request.method == 'POST':
+        selected_contact_id = request.form.get('selected_contact_id')
+        selected_dataset_ids = request.form.getlist('selected_dataset_ids')  # <-- This gets a list of IDs
+        
+        # If adding a new contact
+        if selected_contact_id == "add_new":
+            name = request.form.get("new_contact_name")
+            email = request.form.get("new_contact_email")
+            contact = Contact.query.filter_by(email=email, user_id=current_user.id).first()
+            if not contact:
+                contact = Contact(name=name, email=email, user_id=current_user.id)
+                db.session.add(contact)
+                db.session.commit()
+            selected_contact_id = contact.id  # Use new contact's id
+
+        # Share selected datasets
+        for dataset_id in selected_dataset_ids:
+            shared_chart = SharedChart(
+                dataset_id=dataset_id,
+                shared_with_id=selected_contact_id,
+                owner_id=current_user.id
             )
-            db.session.add(contact)
-            db.session.commit()
-            flash('Contact added!', 'success')
-
+            db.session.add(shared_chart)
+        db.session.commit()
+        flash('Charts shared!', 'success')
         return redirect(url_for('main.share'))
 
     contacts = Contact.query.filter_by(user_id=current_user.id).all()
     return render_template('share.html', form=form, contacts=contacts)
 
-@main.route('/shared-with-me', methods=['GET', 'POST'])
+@main.route('/shared-with-me')
+@login_required
 def shared_with_me():
-    current_user_id = session.get('user_id')
-    # Query users who have shared data with the current user
-    shared_users = (
-        User.query
-        .join(SharedData, SharedData.owner_id == User.id)
-        .filter(SharedData.shared_with_id == current_user_id)
+    contacts = Contact.query.filter_by(user_id=current_user.id).all()
+    shared_charts = (
+        db.session.query(Dataset, SharedChart, User)
+        .join(SharedChart, SharedChart.dataset_id == Dataset.id)
+        .join(User, User.id == SharedChart.owner_id)
+        .filter(SharedChart.shared_with_id == current_user.id)
         .all()
     )
-    # Query datasets shared with the current user
-    shared_datasets = (
-        Dataset.query
-        .join(SharedData, SharedData.dataset_id == Dataset.id)
-        .filter(SharedData.shared_with_id == current_user_id)
-        .all()
-    )
+    # Prepare data for template
+    shared_users = []
+    shared_datasets = []
+    for chart, shared, owner in shared_charts:
+        shared_users.append({
+            'name': owner.name,
+            'email': owner.email,
+            'initials': owner.name[:2].upper(),
+            'shared_since': shared.shared_since
+        })
+        shared_datasets.append({
+            'title': dataset.title,
+            'chart_type': dataset.chart_type
+        })
     return render_template(
         'shared_with_me.html',
         shared_users=shared_users,
-        shared_datasets=shared_datasets
+        shared_datasets=shared_datasets,
+        contacts=contacts
     )
 
 @main.route('/profile')

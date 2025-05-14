@@ -28,7 +28,27 @@
                         <svg viewBox="0 0 16 16" fill="currentColor"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>
                     </div>
                 </div>
-
+                <div class="contacts-list">
+                    <h3>Your Contacts</h3>
+                    <ul>
+                        {% for contact in contacts %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="selected_contact_ids" id="contact_{{ contact.id }}" value="{{ contact.id }}">
+                            <label class="form-check-label" for="contact_{{ contact.id }}">
+                                {{ contact.name }} ({{ contact.email }})
+                            </label>
+                        </div>
+                        {% if loop.index % 2 == 0 %}
+                            </ul>
+                            <ul>
+                        {% endif %}
+                        {% endfor %}
+                        {% if contacts|length == 0 %}
+                        {% else %}
+                        <li>No contacts found.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
                 <div class="user-list">
                     {% for user in shared_users %}
                     <div class="user-card">

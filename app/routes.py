@@ -130,7 +130,7 @@ def dashboard():
         summary=summary
     )
 
-@main.route('/logout')
+@main.route('/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()

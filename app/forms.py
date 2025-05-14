@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, TextAreaField, SelectField, FloatField
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField, SelectField, FloatField, IntegerField
 from wtforms.fields import DateField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 from wtforms.validators import Optional
+from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 
 class LoginForm(FlaskForm):
@@ -23,7 +24,7 @@ class RegistrationForm(FlaskForm):
     medical_conditions = TextAreaField('Medical Conditions', validators=[Length(max=300)])
 
 class EditProfileForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(1, 64)])
+    name = StringField('Name', validators=[DataRequired(), Length(1, 64)])
     about_me = TextAreaField('About Me', validators=[Length(0, 200)])
     gender = SelectField('Gender', choices=[
         ('male', 'Male'),
@@ -37,9 +38,21 @@ class EditProfileForm(FlaskForm):
     medical_conditions = TextAreaField('Medical Conditions', validators=[Optional()])
 
     submit = SubmitField('Save Changes')
+class ManualDataForm(FlaskForm):
+    date = DateField('Date', format='%Y-%m-%d', validators=[DataRequired()])
+    steps = IntegerField('Steps', validators=[DataRequired()])
+    sleep = FloatField('Sleep Hours', validators=[DataRequired()])
+    mood = FloatField('Mood', validators=[DataRequired()])
+    submit = SubmitField('Submit')
 class ContactForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     submit = SubmitField('Add Contact')
 class PersonalizedMessageForm(FlaskForm):
      message = TextAreaField('Personalized Message (Optional)')
+class UploadForm(FlaskForm):
+    file = FileField('Upload CSV', validators=[
+        FileRequired(),
+        FileAllowed(['csv'], 'CSV files only!')
+    ])
+    submit = SubmitField('Upload')

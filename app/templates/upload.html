@@ -28,6 +28,7 @@
         </div>
 
         <form method="post" enctype="multipart/form-data" action="{{ url_for('main.upload') }}">
+          {{ form.hidden_tag() }} 
           <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer">
             <input type="file" name="file" accept=".csv" id="file-upload" class="hidden" />
             <label for="file-upload" class="w-full h-full flex flex-col items-center justify-center cursor-pointer text-center">
@@ -61,6 +62,7 @@
         <p class="text-gray-600 mb-4">Enter your personal data for a specific day manually.</p>
 
         <form method="post" action="{{ url_for('main.submit_manual') }}">
+          {{ form.hidden_tag() }}
           <div class="space-y-4">
             <div class="form-item">
               <label class="form-label text-lg text-gray-700">Date</label>

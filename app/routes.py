@@ -15,6 +15,9 @@ from app.forms import EditProfileForm, ContactForm
 from app.models import User, Contact
 from app.models import  PersonalizedMessage
 from app.forms import PersonalizedMessageForm
+from app.forms import ManualDataForm
+from app.forms import UploadForm
+
 
 # Create a Blueprint called 'main'
 main = Blueprint('main', __name__)
@@ -142,39 +145,39 @@ def logout():
 @main.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
-    if request.method == 'POST':
-        file = request.files.get('file')
-        if file and file.filename.endswith('.csv'):
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
-            file.save(filepath)
+    form = UploadForm()
 
-            with open(filepath, 'r') as f:
-                reader = csv.DictReader(f)
-                count = 0
-                for row in reader:
-                    try:
-                        record = HealthRecord(
-                            user_id=current_user.id,
-                            date=datetime.strptime(row['date'].strip(), "%Y-%m-%d").date(),
-                            steps=int(row['steps'].strip()),
-                            sleep_hours=float(row['sleep_hours'].strip()),
-                            mood=int(row['mood'].strip()),
-                        )
-                        db.session.add(record)
-                        count += 1
-                    except Exception as e:
-                        print(f"Skipping row due to error: {e}")
-                db.session.commit()
-                print(f"[DEBUG] Uploaded {count} records for user ID {current_user.id}")
+    if form.validate_on_submit():
+        file = form.file.data
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+        file.save(filepath)
 
-            flash('File uploaded and data saved successfully!', 'success')
-            return redirect(url_for('main.dashboard'))
-        else:
-            flash('Invalid file format. Please upload a CSV file.', 'danger')
+        with open(filepath, 'r') as f:
+            reader = csv.DictReader(f)
+            count = 0
+            for row in reader:
+                try:
+                    record = HealthRecord(
+                        user_id=current_user.id,
+                        date=datetime.strptime(row['date'].strip(), "%Y-%m-%d").date(),
+                        steps=int(row['steps'].strip()),
+                        sleep_hours=float(row['sleep_hours'].strip()),
+                        mood=int(row['mood'].strip()),
+                    )
+                    db.session.add(record)
+                    count += 1
+                except Exception as e:
+                    print(f"Skipping row due to error: {e}")
+            db.session.commit()
+            print(f"[DEBUG] Uploaded {count} records for user ID {current_user.id}")
 
-    return render_template('upload.html')
+        flash('File uploaded and data saved successfully!', 'success')
+        return redirect(url_for('main.dashboard'))
+
+    return render_template('upload.html', form=form)
+
 
 @main.route('/download_template')
 @login_required
@@ -185,22 +188,20 @@ def download_template():
 @main.route('/submit_manual', methods=['POST'])
 @login_required
 def submit_manual():
-    date = request.form['date']
-    steps = request.form['steps']
-    sleep = request.form['sleep']
-    mood = request.form['mood']
-
-    record = HealthRecord(
-        user_id=current_user.id,
-        date=datetime.strptime(date, '%Y-%m-%d').date(),
-        steps=int(steps),
-        sleep_hours=float(sleep),
-        mood=int(mood)
-    )
-    db.session.add(record)
-    db.session.commit()
-    flash('Manual data submitted successfully!', 'success')
-    return redirect(url_for('main.upload'))
+    form = ManualDataForm()
+    if form.validate_on_submit():
+        record = HealthRecord(
+            user_id=current_user.id,
+            date=form.date.data,
+            steps=form.steps.data,
+            sleep_hours=form.sleep.data,
+            mood=form.mood.data
+        )
+        db.session.add(record)
+        db.session.commit()
+        flash('Manual data submitted successfully!', 'success')
+        return redirect(url_for('main.upload'))
+    return render_template('submit_manual.html', form=form)
 
 
 
@@ -208,20 +209,22 @@ def submit_manual():
 @login_required
 def share():
     form = ContactForm()
+    
+    existing_msg = PersonalizedMessage.query.filter_by(user_id=current_user.id).first()
+    message_text = existing_msg.message if existing_msg else "I'd like to share my data insights with you."
+
     if request.is_json:
         data = request.get_json()
         message_text = data.get('message')
 
         if message_text is not None:
-            existing_msg = PersonalizedMessage.query.filter_by(user_id=current_user.id).first()
             if existing_msg:
-                existing_msg.message = message_text
+                existing_msg.message = message_text 
             else:
-                new_msg = PersonalizedMessage(user_id=current_user.id, message=message_text)
+                new_msg = PersonalizedMessage(user_id=current_user.id, message=message_text)  # 新建消息
                 db.session.add(new_msg)
             db.session.commit()
         return jsonify({'status': 'saved'})
-
     if form.validate_on_submit():
         existing_contact = Contact.query.filter_by(name=form.name.data, user_id=current_user.id).first()
         if existing_contact:
@@ -238,51 +241,53 @@ def share():
 
         return redirect(url_for('main.share'))
 
+
     contacts = Contact.query.filter_by(user_id=current_user.id).all()
-    existing_msg = PersonalizedMessage.query.filter_by(user_id=current_user.id).first()
-    message_text = existing_msg.message if existing_msg else ''
-    return render_template('share.html', form=form, contacts=contacts)
-@main.route('/profile')
+    
+
+    return render_template('share.html', form=form, contacts=contacts, message_text=message_text)
+
+
+@main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    return render_template('profile.html', user=current_user)
+    form = EditProfileForm()
 
+    if request.method == 'POST' and form.validate_on_submit():
+        # Use 'name' instead of 'username'
+        name = form.name.data
+        gender = form.gender.data
+        dob = form.dob.data
+        height = form.height.data
+        weight = form.weight.data
+        medical_conditions = form.medical_conditions.data
 
-@main.route('/edit_profile', methods=['GET', 'POST'])
+        current_user.name = name
+        current_user.gender = gender
+        current_user.dob = dob
+        current_user.height = height
+        current_user.weight = weight
+        current_user.medical_conditions = medical_conditions
 
-@login_required
-def save_profile():
-    name = request.form.get('name')
-    email = request.form.get('email')
-    gender = request.form.get('gender')
-    dob_str = request.form.get('dob')
-    height = request.form.get('height')
-    weight = request.form.get('weight')
-    medical_conditions = request.form.get('medical_conditions')
+        try:
+            db.session.commit()
+            flash('Profile updated successfully!', 'success')
+            return redirect(url_for('main.profile'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'An error occurred while saving your profile: {e}', 'error')
+            return redirect(url_for('main.profile'))
 
-    try:
-        dob = datetime.strptime(dob_str, '%Y-%m-%d').date() if dob_str else None
-    except ValueError:
-        flash('Invalid date format. Please use YYYY-MM-DD.', 'error')
-        return redirect(url_for('main.profile'))
+    if form.is_submitted():
+        form.name.data = current_user.name
+        form.gender.data = current_user.gender
+        form.dob.data = current_user.dob
+        form.height.data = current_user.height
+        form.weight.data = current_user.weight
+        form.medical_conditions.data = current_user.medical_conditions
 
+    return render_template('profile.html', form=form, user=current_user)
 
-    current_user.name = name
-    current_user.email = email
-    current_user.gender = gender
-    current_user.dob = dob
-    current_user.height = float(height) if height else None
-    current_user.weight = float(weight) if weight else None
-    current_user.medical_conditions = medical_conditions
-
-    try:
-        db.session.commit()
-        flash('Profile updated successfully!', 'success')
-        return redirect(url_for('main.profile'))
-    except Exception as e:
-        db.session.rollback()
-        flash('An error occurred while saving your profile: ' + str(e), 'error')
-        return redirect(url_for('main.profile'))
 @main.route('/save_message', methods=['POST'])
 @login_required
 def save_message():

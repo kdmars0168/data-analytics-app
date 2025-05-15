@@ -244,36 +244,88 @@ def share():
     contacts = Contact.query.filter_by(user_id=current_user.id).all()
     return render_template('share.html', form=form, contacts=contacts)
 
+# @main.route('/shared-with-me')
+# @login_required
+# def shared_with_me():
+#     contacts = Contact.query.filter_by(user_id=current_user.id).all()
+#     shared_charts = (
+#         db.session.query(Dataset, SharedChart, User)
+#         .join(SharedChart, SharedChart.dataset_id == Dataset.id)
+#         .join(User, User.id == SharedChart.owner_id)
+#         .filter(SharedChart.shared_with_id == current_user.id)
+#         .all()
+#     )
+#     # Prepare data for template
+#     shared_users = []
+#     shared_datasets = []
+#     for chart, shared, owner in shared_charts:
+#         shared_users.append({
+#             'name': owner.name,
+#             'email': owner.email,
+#             'initials': owner.name[:2].upper(),
+#             'shared_since': shared.shared_since
+#         })
+#         shared_datasets.append({
+#             'title': dataset.title,
+#             'chart_type': dataset.chart_type
+#         })
+#     return render_template(
+#         'shared_with_me.html',
+#         shared_users=shared_users,
+#         shared_datasets=shared_datasets,
+#         contacts=contacts
+#     )
+
+#Dummy route for shared_with_me
 @main.route('/shared-with-me')
 @login_required
 def shared_with_me():
-    contacts = Contact.query.filter_by(user_id=current_user.id).all()
-    shared_charts = (
-        db.session.query(Dataset, SharedChart, User)
-        .join(SharedChart, SharedChart.dataset_id == Dataset.id)
-        .join(User, User.id == SharedChart.owner_id)
-        .filter(SharedChart.shared_with_id == current_user.id)
-        .all()
-    )
-    # Prepare data for template
-    shared_users = []
-    shared_datasets = []
-    for chart, shared, owner in shared_charts:
-        shared_users.append({
-            'name': owner.name,
-            'email': owner.email,
-            'initials': owner.name[:2].upper(),
-            'shared_since': shared.shared_since
-        })
-        shared_datasets.append({
-            'title': dataset.title,
-            'chart_type': dataset.chart_type
-        })
+    # === DUMMY DATA VERSION FOR FRONTEND DEVELOPMENT ===
+
+    # Simulated contacts
+    contacts = [
+        {'id': 1, 'name': 'Jane Smith', 'email': 'jane@example.com'},
+        {'id': 2, 'name': 'John Doe', 'email': 'john@example.com'},
+        {'id': 3, 'name': 'Sarah Wilson', 'email': 'sarah@example.com'}
+    ]
+
+    # Simulated users who shared with you
+    shared_users = [
+        {
+            'name': 'Jane Smith',
+            'email': 'jane@example.com',
+            'initials': 'JS',
+            'shared_since': datetime(2025, 4, 10)
+        },
+        {
+            'name': 'John Doe',
+            'email': 'john@example.com',
+            'initials': 'JD',
+            'shared_since': datetime(2025, 4, 12)
+        },
+        {
+            'name': 'Sarah Wilson',
+            'email': 'sarah@example.com',
+            'initials': 'SW',
+            'shared_since': datetime(2025, 4, 15)
+        }
+    ]
+
+    # Simulated datasets (you can filter these by user later)
+    shared_datasets = [
+        {'title': 'Weekly Step Count', 'chart_type': 'Bar Chart'},
+        {'title': 'Sleep Patterns', 'chart_type': 'Line Chart'},
+        {'title': 'Mood Distribution', 'chart_type': 'Pie Chart'}
+    ]
+
+    # Example flash message when a dataset is viewed
+    flash("Dataset loaded: Viewing shared dataset from Sarah Wilson", "info")
+
     return render_template(
         'shared_with_me.html',
+        contacts=contacts,
         shared_users=shared_users,
-        shared_datasets=shared_datasets,
-        contacts=contacts
+        shared_datasets=shared_datasets
     )
 
 @main.route('/profile')

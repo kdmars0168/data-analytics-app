@@ -1,16 +1,13 @@
 {% extends "base.html" %}
 {% block content %}
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Share Your Data</title>
-    <link rel="stylesheet" href="static/css/sharestyles.css">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sharestyles.css') }}">
 </head>
-<script src="{{ url_for('static', filename='js/share.js') }}"></script>
 
 <body>
-
 <div class="main-content">
     <div class="share-container">
         <header>
@@ -18,219 +15,66 @@
             <p>Securely share your visualizations with specific people.</p>
         </header>
 
-        <!-- Tabs Navigation -->
-        <div class="tabs">
-            <button id="tab-share-data" class="tab-button active" data-tab="share-data-content">
-                Share Data
-            </button>
-            <button id="tab-manage-data" class="tab-button" data-tab="manage-data-content">
-                Manage Shared Data
-            </button>
+        <form method="POST" action="{{ url_for('main.add_contact') }}">
+    {{ contact_form.hidden_tag() }}
+    <section class="content-section add-contact-section">
+        <h2>Add a New Contact</h2>
+
+        <div class="form-group">
+            {{ contact_form.name.label(class="form-label") }}
+            {{ contact_form.name(class="form-control", placeholder="Enter name") }}
         </div>
 
-        <!-- Tab Content -->
-        <div class="tab-content-area">
+        <div class="form-group">
+            {{ contact_form.email.label(class="form-label") }}
+            {{ contact_form.email(class="form-control", placeholder="Enter email") }}
+        </div>
 
-            <!-- Share Data Tab Content -->
-            <div id="share-data-content" class="tab-pane active">
-                <section class="content-section">
-                    <h2>Select Visualizations to Share</h2>
-                    <p class="section-subtitle">Choose which charts and insights you want to share</p>
-                    <ul class="selection-list visualization-list">
-                        <li>
-                            <label for="viz1">
-                                <input type="checkbox" id="viz1">
-                                <span class="item-details">
-                                    <span class="item-name">Weekly Step Count</span>
-                                    <span class="item-meta">Bar Chart - Created 2025-04-05</span>
-                                </span>
-                            </label>
-                        </li>
-                        <li>
-                            
-                            <label for="viz2">
-                                <input type="checkbox" id="viz2">
-                                <span class="item-details">
-                                    <span class="item-name">Sleep Patterns</span>
-                                    <span class="item-meta">Line Chart - Created 2025-04-08</span>
-                                </span>
-                            </label>
-                        </li>
-                         <li>
-                            <label for="viz3">
-                                <input type="checkbox" id="viz3">
-                                <span class="item-details">
-                                    <span class="item-name">Mood Distribution</span>
-                                    <span class="item-meta">Pie Chart - Created 2025-04-12</span>
-                                </span>
-                            </label>
-                        </li>
-                         <li>
-                            <label for="viz4">
-                                <input type="checkbox" id="viz4">
-                                <span class="item-details">
-                                    <span class="item-name">Sleep vs Mood</span>
-                                    <span class="item-meta">Line Chart - Created 2025-04-15</span>
-                                </span>
-                            </label>
-                        </li>
-                    </ul>
-                </section>
-
-               <section class="content-section">
-        <h2>Select Recipients</h2>
-    <p class="section-subtitle">Choose people to share your selected visualizations with</p>
-
-    <form method="POST" class="add-recipient-form">
-    {{ form.hidden_tag() }}
-
-    <div class="form-group mb-3">
-        {{ form.name.label }}
-        {{ form.name(placeholder='Enter name', class="form-control") }}
-    </div>
-
-    <div class="form-group mb-3">
-        {{ form.email.label }}
-        {{ form.email(placeholder='Enter email', class="form-control") }}
-    </div>
-
-    <div class="form-group">
-        {{ form.submit(class="btn btn-primary btn-add btn-lg") }}
-    </div>
+        <button type="submit" class="btn btn-secondary btn-add-contact">
+            Add Contact
+        </button>
+    </section>
 </form>
 
+        <hr />
 
+        <!-- Share Data Form -->
+        <form method="POST" action="{{ url_for('main.share_data') }}">
+            {{ share_form.hidden_tag() }}
+            <section class="content-section share-data-section">
+                <h2>Select Visualizations to Share</h2>
+                <ul class="selection-list visualization-list">
+                    <li><label><input type="checkbox" name="visualizations" value="steps" /> Step Count (Bar Chart)</label></li>
+                    <li><label><input type="checkbox" name="visualizations" value="sleep_hours" /> Sleep Patterns (Line Chart)</label></li>
+                    <li><label><input type="checkbox" name="visualizations" value="moods" /> Mood Distribution (Pie Chart)</label></li>
+                    <li><label><input type="checkbox" name="visualizations" value="sleep_vs_mood" /> Sleep vs Mood (Line Chart)</label></li>
+                </ul>
 
-    <h3 class="contacts-heading">Your Contacts</h3>
-    <ul class="selection-list contact-list">
-        {% for contact in contacts %}
-            <li class="flex items-center">
-                <input type="checkbox" id="contact-{{ contact.id }}" class="mr-2">
-                <label for="contact-{{ contact.id }}" class="contact-name">
-                    {{ contact.name }} - <span class="contact-email">{{ contact.email }}</span>
-                </label>
-            </li>
-        {% else %}
-            <li>No contacts added yet.</li>
-        {% endfor %}
-    </ul>
-</section>
+                <h2>Select Recipients</h2>
+                <ul class="selection-list contact-list">
+                    {% if contacts %}
+                        {% for contact in contacts %}
+                            <li>
+                                <label>
+                                    <input type="checkbox" name="contacts" value="{{ contact.id }}" />
+                                    {{ contact.name }} - {{ contact.email }}
+                                </label>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li>No contacts added yet.</li>
+                    {% endif %}
+                </ul>
 
-                <!-- Personalized Message Section -->
-                <section class="content-section">
-                    <label for="personalized-message" class="message-label">Personalized Message (Optional)</label>
-                    <textarea id="personalized-message" rows="3" placeholder="I'd like to share my data insights with you.">{{ message_text }}</textarea>
-                </section>
+                <!--<h2>Personalized Message (Optional)</h2>
+                <textarea name="personalized_message" id="personalized-message" rows="3" placeholder="I'd like to share my data insights with you.">{{ message_text }}</textarea>-->
 
-                 <!-- Share Actions Footer -->
-                <footer>
-                    <button class="btn btn-primary btn-share">
-                        Share Now
-                    </button>
-                </footer>
-            </div>
-
-            <!-- Manage Shared Data Tab Content -->
-            <div id="manage-data-content" class="tab-pane">
-                <section class="content-section">
-                    <h2>People With Access</h2>
-                    <p class="section-subtitle">Manage who can see your shared visualizations</p>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Shared Date</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><span class="icon person-icon">👤</span> Jane Smith</td>
-                                    <td><span class="icon email-icon">✉️</span> jane@example.com</td>
-                                    <td>2025-04-10</td>
-                                    <td><span class="status status-viewed"><span class="icon status-icon">🟡</span> Viewed</span></td>
-                                    <td><button class="btn-revoke"><span class="icon revoke-icon">⊖</span> Revoke</button></td>
-                                </tr>
-                                <tr>
-                                    <td><span class="icon person-icon">👤</span> John Doe</td>
-                                    <td><span class="icon email-icon">✉️</span> john@example.com</td>
-                                    <td>2025-04-12</td>
-                                    <td><span class="status status-pending"><span class="icon status-icon">⚪</span> Pending</span></td>
-                                    <td><button class="btn-revoke"><span class="icon revoke-icon">⊖</span> Revoke</button></td>
-                                </tr>
-                                <tr>
-                                    <td><span class="icon person-icon">👤</span> Sarah Wilson</td>
-                                    <td><span class="icon email-icon">✉️</span> sarah@example.com</td>
-                                    <td>2025-04-15</td>
-                                    <td><span class="status status-accepted"><span class="icon status-icon">🟢</span> Accepted</span></td>
-                                    <td><button class="btn-revoke"><span class="icon revoke-icon">⊖</span> Revoke</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-                 <section class="content-section">
-                    <h2>Visualization Sharing Status</h2>
-                    <p class="section-subtitle">Manage which visualizations are shared</p>
-                     <div class="table-container">
-                        <table class="data-table">
-                             <thead>
-                                <tr>
-                                    <th>Visualization</th>
-                                    <th>Type</th>
-                                    <th>Created Date</th>
-                                    <th>Shared</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Weekly Step Count</td>
-                                    <td>Bar Chart</td>
-                                    <td>2025-04-05</td>
-                                    <td>Yes / Toggle</td> <!-- Example, replace with actual status/control -->
-                                </tr>
-                                 <tr>
-                                    <td>Sleep Patterns</td>
-                                    <td>Line Chart</td>
-                                    <td>2025-04-08</td>
-                                     <td>Yes / Toggle</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
-            </div>
-        </div>
+                <button type="submit" name="action" value="share_data" class="btn btn-primary btn-share-now">
+                    Share Now
+                </button>
+            </section>
+        </form>
     </div>
 </div>
-
-<script>
-    // Basic Tab Switching Logic
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const targetTabId = button.getAttribute('data-tab');
-
-            // Update button active states
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-
-            // Update pane visibility
-            tabPanes.forEach(pane => {
-                if (pane.id === targetTabId) {
-                    pane.classList.add('active');
-                } else {
-                    pane.classList.remove('active');
-                }
-            });
-        });
-    });
-
-</script>
 </body>
 {% endblock %}

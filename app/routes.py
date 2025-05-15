@@ -2,7 +2,7 @@ import os, json
 from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify, send_from_directory, current_app
 from app import db
 from app.forms import RegistrationForm, LoginForm, EditProfileForm
-from app.models import User, UploadedData, SharedData, HealthRecord
+from app.models import User, SharedData, HealthRecord
 from flask_login import login_user, logout_user, login_required, current_user
 from app.utils import generate_analysis_summary
 from sqlalchemy import extract
@@ -12,12 +12,12 @@ from werkzeug.utils import secure_filename
 from collections import defaultdict
 from statistics import mean
 from app.forms import EditProfileForm, ContactForm
-from app.models import User, Contact
+from app.models import User, Contact, SharedData
 from app.models import  PersonalizedMessage
 from app.forms import PersonalizedMessageForm
-from app.forms import ManualDataForm
+from app.forms import ManualDataForm,ShareDataForm
 from app.forms import UploadForm
-
+from flask import request, flash, redirect, url_for, render_template
 
 # Create a Blueprint called 'main'
 main = Blueprint('main', __name__)
@@ -200,54 +200,8 @@ def submit_manual():
         db.session.add(record)
         db.session.commit()
         flash('Manual data submitted successfully!', 'success')
-        return redirect(url_for('main.upload'))
-    return render_template('submit_manual.html', form=form)
-
-
-
-@main.route('/share', methods=['GET', 'POST'])
-@login_required
-def share():
-    form = ContactForm()
-    
-    existing_msg = PersonalizedMessage.query.filter_by(user_id=current_user.id).first()
-    message_text = existing_msg.message if existing_msg else "I'd like to share my data insights with you."
-
-    if request.is_json:
-        data = request.get_json()
-        message_text = data.get('message')
-
-        if message_text is not None:
-            if existing_msg:
-                existing_msg.message = message_text 
-            else:
-                new_msg = PersonalizedMessage(user_id=current_user.id, message=message_text)  # 新建消息
-                db.session.add(new_msg)
-            db.session.commit()
-        return jsonify({'status': 'saved'})
-    if form.validate_on_submit():
-        existing_contact = Contact.query.filter_by(name=form.name.data, user_id=current_user.id).first()
-        if existing_contact:
-            flash('Contact name already exists.', 'danger')
-        else:
-            contact = Contact(
-                name=form.name.data,
-                email=form.email.data,
-                user_id=current_user.id 
-            )
-            db.session.add(contact)
-            db.session.commit()
-            flash('Contact added!', 'success')
-
-        return redirect(url_for('main.share'))
-
-
-    contacts = Contact.query.filter_by(user_id=current_user.id).all()
-    
-
-    return render_template('share.html', form=form, contacts=contacts, message_text=message_text)
-
-
+        return redirect(url_for('main.dashboard'))
+    return render_template('upload.html', form=form)
 @main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -288,6 +242,7 @@ def profile():
 
     return render_template('profile.html', form=form, user=current_user)
 
+
 @main.route('/save_message', methods=['POST'])
 @login_required
 def save_message():
@@ -298,7 +253,78 @@ def save_message():
         if existing_msg:
             existing_msg.message = message_text 
         else:
-            new_msg = PersonalizedMessage(user_id=current_user.id, message=message_text)  # 没有就新建
+            new_msg = PersonalizedMessage(user_id=current_user.id, message=message_text)  
             db.session.add(new_msg)
         db.session.commit()
-    return jsonify({'status': 'saved'})  
+    return jsonify({'status': 'saved'}) 
+@main.route('/shared-with-me')
+@login_required
+def shared_with_me():
+    return render_template(
+        'shared_with_me.html'
+    ) 
+@main.route('/share', methods=['GET'])
+@login_required
+def share():
+
+    contact_form = ContactForm()
+    share_form = ShareDataForm()
+
+
+    contacts = Contact.query.filter_by(user_id=current_user.id).all()
+    share_form.contacts.choices = [(c.id, f"{c.name} - {c.email}") for c in contacts]
+
+    message_text = ""
+
+    return render_template('share.html',
+                           share_form=share_form,
+                           contact_form=contact_form,
+                           contacts=contacts,
+                           message_text=message_text)
+
+
+@main.route('/add_contact', methods=['POST'])
+@login_required
+def add_contact():
+    form = ContactForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        email = form.email.data
+
+
+        existing = Contact.query.filter_by(user_id=current_user.id, email=email).first()
+        if existing:
+            flash("This contact already exists.", "warning")
+        else:
+            new_contact = Contact(user_id=current_user.id, name=name, email=email)
+            db.session.add(new_contact)
+            db.session.commit()
+            flash("Contact added successfully.", "success")
+    else:
+        flash("Invalid contact information.", "danger")
+
+    return redirect(url_for('main.share'))
+
+
+@main.route('/share_data', methods=['POST'])
+@login_required
+def share_data():
+    selected_visuals = request.form.getlist('visualizations')
+    selected_contacts = request.form.getlist('contacts')
+    message_text = request.form.get('personalized_message', '')
+
+    if not selected_visuals or not selected_contacts:
+        flash("Please select at least one visualization and one contact.", "danger")
+        return redirect(url_for('main.share'))
+
+    for contact_id in selected_contacts:
+        for vis in selected_visuals:
+            shared = SharedData(
+                shared_by_user_id=current_user.id,
+                data_type=vis,
+                shared_with_contact_email=Contact.query.get(contact_id).email
+            )
+            db.session.add(shared)
+    db.session.commit()
+    flash("Data shared successfully!", "success")
+    return redirect(url_for('main.share'))

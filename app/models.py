@@ -9,8 +9,12 @@ class User(db.Model, UserMixin):
     name = db.Column(db.String(150), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
-    uploaded_data = db.relationship('UploadedData', backref='owner', lazy=True)
-    shared_data = db.relationship('SharedData', backref='shared_with', lazy=True)
+    uploaded_data = db.relationship('HealthRecord', backref='owner', lazy=True)
+    shared_data = db.relationship(
+    'SharedData',
+    primaryjoin="User.email == foreign(SharedData.shared_with_contact_email)",
+    backref='shared_with_user',
+    lazy=True)
     gender = db.Column(db.String(10))  
     dob = db.Column(db.Date)           
     height = db.Column(db.Float)      
@@ -24,29 +28,19 @@ class User(db.Model, UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-class UploadedData(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(256))
-    file_path = db.Column(db.String(512), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
-    shared_data = db.relationship('SharedData', backref='data', lazy=True)
 
-    def __repr__(self):
-        return f'<UploadedData {self.filename}>'
 
 class SharedData(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    data_id = db.Column(db.Integer, db.ForeignKey('uploaded_data.id'))
-    shared_with_user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    shared_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    data_type = db.Column(db.String(50), nullable=False) 
+    shared_with_contact_email = db.Column(db.String(150), db.ForeignKey('contact.email'), nullable=False)
     shared_at = db.Column(db.DateTime, default=datetime.utcnow)
-    status = db.Column(db.String(50), default='Pending')
+    contact = db.relationship('Contact', backref='shared_data', foreign_keys=[shared_with_contact_email])
 
     def __repr__(self):
-        return f'<SharedData {self.data_id} to {self.shared_with_user_id}>'
+        return f'<SharedData {self.data_id} shared with {self.shared_with_contact_email}>'
 
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
 
 class HealthRecord(db.Model):
@@ -63,7 +57,7 @@ class HealthRecord(db.Model):
 class Contact(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100))
-    email = db.Column(db.String(150), nullable=False)
+    email = db.Column(db.String(150), nullable=False, unique=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -78,3 +72,4 @@ class PersonalizedMessage(db.Model):
 
     def __repr__(self):
         return f'<PersonalizedMessage {self.id} from user {self.user_id}>'
+

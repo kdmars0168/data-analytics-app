@@ -45,18 +45,22 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <div class="bg-white p-6 rounded-lg shadow-md">
         <h2 class="text-gray-500 text-sm mb-2">Average Steps</h2>
+        <p class="text-xs text-gray-400 -mt-1">All-time</p>
         <p class="text-2xl font-bold">{{ summary.average_steps }}</p>
       </div>
       <div class="bg-white p-6 rounded-lg shadow-md">
         <h2 class="text-gray-500 text-sm mb-2">Average Sleep (hrs)</h2>
+        <p class="text-xs text-gray-400 -mt-1">All-time</p>
         <p class="text-2xl font-bold">{{ summary.sleep_quality }} hrs</p>
       </div>
       <div class="bg-white p-6 rounded-lg shadow-md">
         <h2 class="text-gray-500 text-sm mb-2">Average Mood (0–4)</h2>
+        <p class="text-xs text-gray-400 -mt-1">All-time</p>
         <p class="text-2xl font-bold">{{ summary.average_mood }}/4</p>
       </div>
       <div class="bg-white p-6 rounded-lg shadow-md">
         <h2 class="text-gray-500 text-sm mb-2">Trend Score</h2>
+        <p class="text-xs text-gray-400 -mt-1">All-time</p>
         <p class="text-2xl font-bold">{{ summary.trend_score }}/100</p>
       </div>
     </div>
@@ -94,8 +98,10 @@
 
     <!-- Analysis Summary -->
     <div class="bg-white p-8 rounded-lg shadow-md w-full">
-      <h2 class="text-2xl font-bold mb-2">Analysis Summary</h2>
-      <p class="text-gray-500 mb-6">Key insights from your data</p>
+      <h2 class="text-2xl font-bold mb-2">Analysis Summary (Past 7 Days)</h2>
+      <p class="text-gray-500 mb-6">
+        Generated from your most recent 7 days of activity
+      </p>
 
       <div class="space-y-6 text-gray-700 text-base">
         <div>

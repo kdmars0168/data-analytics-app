@@ -1,0 +1,333 @@
+
+:root {
+    --primary-purple: #A076F9;
+    --light-purple-bg: #F6F3FC;
+    --border-color-selected-user: var(--primary-purple);
+    
+    --card-bg: #ffffff;
+    --page-bg: #f8f9fa;
+    --text-primary: #333743;
+    --text-secondary: #5A5E6C; 
+    --text-tertiary: #9095A5; 
+    
+    --border-color: #E8E9EC;
+    --tag-bg: #F0F1F3;
+    --tag-text-color: #5A5E6C;
+
+    --icon-bg-purple: #EAE3FC; 
+    --icon-color-purple: #7B61FF; 
+    --icon-bg-teal: #D9F3F0;    
+    --icon-color-teal: #37A294;
+    --icon-bg-orange: #FBEFEA;  
+    --icon-color-orange: #E67E22;
+
+    --border-radius-md: 8px;
+    --border-radius-sm: 4px;
+    --card-shadow: 0 4px 12px rgba(0,0,0,0.05);
+
+    --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--page-bg);
+    margin: 0;
+    padding: 0;
+    color: var(--text-primary);
+}
+
+.main-content-wrapper { /* Wrapper to simulate overall page structure */
+    padding: 30px;
+}
+
+.page-header h1 {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.page-header p {
+    font-size: 16px;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+.content-columns {
+    display: flex;
+    gap: 30px;
+}
+
+.column {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius-md);
+    padding: 24px;
+    box-shadow: var(--card-shadow);
+}
+
+.people-sharing-section {
+    flex: 0 0 380px; /* Fixed width for left column */
+    display: flex;
+    flex-direction: column;
+}
+
+.shared-datasets-section {
+    flex: 1; /* Takes remaining space */
+}
+
+.column h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 8px;
+}
+
+.column .section-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.controls {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    align-items: center;
+}
+
+.search-bar {
+    flex-grow: 1;
+    position: relative;
+}
+
+.search-bar svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-tertiary);
+    width: 16px;
+    height: 16px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 10px 12px 10px 36px; /* Left padding for icon */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    box-sizing: border-box;
+}
+.search-bar input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.filter-dropdown {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    background-color: #fff; /* Ensure it's on top of column bg if different */
+}
+
+.filter-dropdown span {
+    margin-right: 8px;
+}
+
+.filter-dropdown svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-secondary);
+}
+
+.user-list {
+    overflow-y: auto; /* In case of many users */
+    flex-grow: 1; /* Takes available space in the column */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.user-card {
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.user-card:hover {
+    border-color: var(--primary-purple);
+    box-shadow: 0 2px 8px rgba(160, 118, 249, 0.2);
+}
+
+.user-card.selected {
+    background-color: var(--light-purple-bg);
+    border-left: 4px solid var(--border-color-selected-user);
+    border-top-color: var(--border-color);
+    border-right-color: var(--border-color);
+    border-bottom-color: var(--border-color);
+    padding-left: 13px; /* (16px - 4px + 1px for original border) */
+}
+
+.user-card.selected:hover {
+        box-shadow: none; /* Optional: disable hover shadow for selected */
+}
+
+
+.user-card-top-content {
+    display: flex;
+    align-items: flex-start; /* Align avatar to top with multi-line text */
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--icon-bg-purple); /* A general light color */
+    color: var(--icon-color-purple); /* Text color for initials */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.user-card.selected .avatar {
+    background-color: #D1C4E9; /* Slightly different shade for selected card's avatar bg */
+    color: #5E35B1;
+}
+
+.user-details h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 2px 0;
+    color: var(--text-primary);
+}
+
+.user-details .email {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0 0 6px 0;
+}
+
+.user-details .shared-since {
+    font-size: 12px;
+    color: var(--text-tertiary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.user-details .shared-since svg {
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    color: var(--text-tertiary);
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.tag {
+    background-color: var(--tag-bg);
+    color: var(--tag-text-color);
+    padding: 4px 10px;
+    border-radius: var(--border-radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+
+.tag svg {
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    color: var(--tag-text-color); /* Icon color matches text */
+}
+
+.dataset-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsive grid */
+    gap: 20px;
+}
+
+@media (min-width: 768px) { /* For wider screens, lock to 2 columns if desired */
+        .dataset-grid {
+        grid-template-columns: repeat(2, 1fr);
+        }
+}
+
+
+.dataset-card {
+    background-color: #fff; /* White, because parent column is also white */
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: 20px;
+    text-align: center;
+    transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.dataset-card:hover {
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+
+.dataset-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    margin: 0 auto 16px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dataset-icon-wrapper svg {
+    width: 24px;
+    height: 24px;
+}
+
+.dataset-card h4 {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    color: var(--text-primary);
+}
+
+.dataset-card p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Specific dataset icon styles */
+.dataset-icon-wrapper.purple {
+    background-color: var(--icon-bg-purple);
+}
+.dataset-icon-wrapper.purple svg {
+    color: var(--icon-color-purple);
+}
+.dataset-icon-wrapper.teal {
+    background-color: var(--icon-bg-teal);
+}
+.dataset-icon-wrapper.teal svg {
+    color: var(--icon-color-teal);
+}
+.dataset-icon-wrapper.orange {
+    background-color: var(--icon-bg-orange);
+}
+.dataset-icon-wrapper.orange svg {
+    color: var(--icon-color-orange);
+}

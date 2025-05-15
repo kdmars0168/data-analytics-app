@@ -397,9 +397,6 @@ def shared_with_me():
         {'title': 'Mood Distribution', 'chart_type': 'Pie Chart'}
     ]
 
-    # Example flash message when a dataset is viewed
-    flash("Dataset loaded: Viewing shared dataset from Sarah Wilson", "info")
-
     return render_template(
         'shared_with_me.html',
         contacts=contacts,

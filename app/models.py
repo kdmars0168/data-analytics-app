@@ -69,3 +69,16 @@ class Contact(db.Model):
 
     def __repr__(self):
         return f"<Contact {self.name}>"
+
+class Dataset(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    title = db.Column(db.String(128))
+    chart_type = db.Column(db.String(32))
+
+class SharedChart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))  # <-- use dataset_id
+    shared_with_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # recipient
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # sharer
+    shared_since = db.Column(db.DateTime, default=datetime.utcnow)

@@ -62,6 +62,7 @@ A data analytics web application that allows users to upload personal datasets, 
    ```bash
    flask db init
    flask db migrate -m "Initial migration"
+   flask db migrate -m "Add Dataset table"
    flask db upgrade
    ```
 

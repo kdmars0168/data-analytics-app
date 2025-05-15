@@ -257,12 +257,6 @@ def save_message():
             db.session.add(new_msg)
         db.session.commit()
     return jsonify({'status': 'saved'}) 
-@main.route('/shared-with-me')
-@login_required
-def shared_with_me():
-    return render_template(
-        'shared_with_me.html'
-    ) 
 @main.route('/share', methods=['GET'])
 @login_required
 def share():
@@ -328,3 +322,43 @@ def share_data():
     db.session.commit()
     flash("Data shared successfully!", "success")
     return redirect(url_for('main.share'))
+
+
+@main.route('/shared_with_me')
+@login_required
+def shared_with_me():
+    shared_records = SharedData.query.filter_by(shared_with_contact_email=current_user.email).all()
+    shared_by_user_ids = list(set(record.shared_by_user_id for record in shared_records))
+    shared_users = User.query.filter(User.id.in_(shared_by_user_ids)).all()
+
+    user_id = request.args.get('user_id', type=int)
+
+    selected_user = None
+    steps_data = []
+    sleep_data = []
+    mood_data = []
+    sleep_vs_mood_data = []
+
+    if user_id:
+        selected_user = User.query.get(user_id)
+        if selected_user:
+            # 从 HealthRecord 表中获取该用户所有健康数据，按日期排序
+            records = HealthRecord.query.filter_by(user_id=user_id).order_by(HealthRecord.date).all()
+
+            # 组装数据格式：每条都是 {'date': 'YYYY-MM-DD', 'value': xxx}
+            steps_data = [{'date': r.date.strftime('%Y-%m-%d'), 'steps': r.steps} for r in records]
+            sleep_data = [{'date': r.date.strftime('%Y-%m-%d'), 'sleep_hours': r.sleep_hours} for r in records]
+            mood_data = [{'date': r.date.strftime('%Y-%m-%d'), 'mood': r.mood} for r in records]
+
+            # sleep_vs_mood_data 为二维数据，可以直接用 date, sleep_hours, mood
+            sleep_vs_mood_data = [{'date': r.date.strftime('%Y-%m-%d'), 'sleep_hours': r.sleep_hours, 'mood': r.mood} for r in records]
+
+    return render_template(
+        'shared_with_me.html',
+        shared_users=shared_users,
+        selected_user=selected_user,
+        steps_data=steps_data,
+        sleep_data=sleep_data,
+        mood_data=mood_data,
+        sleep_vs_mood_data=sleep_vs_mood_data
+    )

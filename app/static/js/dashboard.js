@@ -8,6 +8,14 @@ document.addEventListener('DOMContentLoaded', function () {
   let currentTimeframe = 'weekly';
 
   const chartData = window.chartData;
+  const moodData = window.moodData;
+
+  const moodColorMap = {
+    Happy: '#5D3FD3',
+    Stressed: '#FFBB28',
+    Sad: '#FF7F50',
+    Tired: '#20B2AA'
+  };
 
   function destroyAllCharts() {
     if (stepsChart) stepsChart.destroy();
@@ -24,13 +32,18 @@ document.addEventListener('DOMContentLoaded', function () {
       type: 'bar',
       data: {
         labels: labels,
-        datasets: [{
-          label: 'Steps',
-          data: (filter === 'all' || filter === 'steps') ? chartData[currentTimeframe].steps : [],
-          backgroundColor: '#5D3FD3',
-        }]
+        datasets: [
+          {
+            label: 'Steps',
+            data:
+              filter === 'all' || filter === 'steps'
+                ? chartData[currentTimeframe].steps
+                : [],
+            backgroundColor: '#5D3FD3',
+          },
+        ],
       },
-      options: { responsive: true, maintainAspectRatio: false }
+      options: { responsive: true, maintainAspectRatio: false },
     });
 
     // Sleep Chart
@@ -38,34 +51,63 @@ document.addEventListener('DOMContentLoaded', function () {
       type: 'line',
       data: {
         labels: labels,
-        datasets: [{
-          label: 'Sleep (hours)',
-          data: (filter === 'all' || filter === 'sleep') ? chartData[currentTimeframe].sleep : [],
-          borderColor: '#20B2AA',
-          tension: 0.4,
-          fill: false
-        }]
+        datasets: [
+          {
+            label: 'Sleep (hours)',
+            data:
+              filter === 'all' || filter === 'sleep'
+                ? chartData[currentTimeframe].sleep
+                : [],
+            borderColor: '#20B2AA',
+            tension: 0.4,
+            fill: false,
+          },
+        ],
       },
-      options: { responsive: true, maintainAspectRatio: false }
+      options: { responsive: true, maintainAspectRatio: false },
     });
 
-    // Mood Chart
+    // Mood Pie Chart with consistent order
+    const fixedOrder = ['Happy', 'Stressed', 'Sad', 'Tired'];
+    const moodBreakdown = moodData[currentTimeframe] || {};
+
+    const moodLabels = [];
+    const moodPercentages = [];
+    const moodColors = [];
+
+    fixedOrder.forEach(label => {
+      if (moodBreakdown[label] !== undefined) {
+        moodLabels.push(label);
+        moodPercentages.push(moodBreakdown[label]);
+        moodColors.push(moodColorMap[label]);
+      }
+    });
+
     moodChart = new Chart(moodCanvas.getContext('2d'), {
       type: 'pie',
       data: {
-        labels: ['Happy', 'Neutral', 'Tired', 'Stressed'],
-        datasets: [{
-          data: (filter === 'all' || filter === 'mood') ? chartData[currentTimeframe].mood : [],
-          backgroundColor: ['#5D3FD3', '#20B2AA', '#FF7F50', '#FFBB28']
-        }]
+        labels: moodLabels,
+        datasets: [
+          {
+            data: moodPercentages,
+            backgroundColor: moodColors,
+          },
+        ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom' }
-        }
-      }
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: function (ctx) {
+                return `${ctx.label}: ${ctx.parsed}%`;
+              },
+            },
+          },
+        },
+      },
     });
 
     // Sleep vs Mood Correlation
@@ -76,30 +118,36 @@ document.addEventListener('DOMContentLoaded', function () {
         datasets: [
           {
             label: 'Sleep (hours)',
-            data: (filter === 'all' || filter === 'sleep') ? chartData[currentTimeframe].sleep : [],
+            data:
+              filter === 'all' || filter === 'sleep'
+                ? chartData[currentTimeframe].sleep
+                : [],
             borderColor: '#20B2AA',
             yAxisID: 'y1',
             tension: 0.4,
-            fill: false
+            fill: false,
           },
           {
             label: 'Mood (score)',
-            data: (filter === 'all' || filter === 'mood') ? chartData[currentTimeframe].mood : [],
+            data:
+              filter === 'all' || filter === 'mood'
+                ? chartData[currentTimeframe].mood
+                : [],
             borderColor: '#FF7F50',
             yAxisID: 'y2',
             tension: 0.4,
-            fill: false
-          }
-        ]
+            fill: false,
+          },
+        ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         scales: {
           y1: { type: 'linear', position: 'left' },
-          y2: { type: 'linear', position: 'right' }
-        }
-      }
+          y2: { type: 'linear', position: 'right' },
+        },
+      },
     });
   }
 

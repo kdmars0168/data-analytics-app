@@ -1,16 +1,38 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <div class="flex min-h-screen">
   <main class="flex-1 bg-gray-50 p-8 overflow-y-auto">
     <div class="flex justify-between items-center mb-6">
       <div class="flex space-x-4" id="data-filters">
-        <button id="filter-all" class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100">All Data</button>
-        <button id="filter-steps" class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100">Steps</button>
-        <button id="filter-sleep" class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100">Sleep</button>
-        <button id="filter-mood" class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100">Mood</button>
+        <button
+          id="filter-all"
+          class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100"
+        >
+          All Data
+        </button>
+        <button
+          id="filter-steps"
+          class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100"
+        >
+          Steps
+        </button>
+        <button
+          id="filter-sleep"
+          class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100"
+        >
+          Sleep
+        </button>
+        <button
+          id="filter-mood"
+          class="px-4 py-2 text-sm font-semibold rounded border border-gray-300 hover:bg-purple-100"
+        >
+          Mood
+        </button>
       </div>
       <div>
-        <select id="time-filter" class="border border-purple-500 rounded px-4 py-2 text-sm focus:outline-none">
+        <select
+          id="time-filter"
+          class="border border-purple-500 rounded px-4 py-2 text-sm focus:outline-none"
+        >
           <option value="daily">Last 7 Days</option>
           <option value="weekly" selected>Last 6 Weeks</option>
           <option value="monthly">Last 6 Months</option>
@@ -26,12 +48,12 @@
         <p class="text-2xl font-bold">{{ summary.average_steps }}</p>
       </div>
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-gray-500 text-sm mb-2">Sleep Quality</h2>
-        <p class="text-2xl font-bold">{{ summary.sleep_quality }}/10</p>
+        <h2 class="text-gray-500 text-sm mb-2">Average Sleep (hrs)</h2>
+        <p class="text-2xl font-bold">{{ summary.sleep_quality }} hrs</p>
       </div>
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h2 class="text-gray-500 text-sm mb-2">Average Mood</h2>
-        <p class="text-2xl font-bold">{{ summary.average_mood }}/10</p>
+        <h2 class="text-gray-500 text-sm mb-2">Average Mood (0–4)</h2>
+        <p class="text-2xl font-bold">{{ summary.average_mood }}/4</p>
       </div>
       <div class="bg-white p-6 rounded-lg shadow-md">
         <h2 class="text-gray-500 text-sm mb-2">Trend Score</h2>
@@ -101,5 +123,6 @@
 <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
 <script>
   window.chartData = JSON.parse('{{ chart_data|safe }}');
+  window.moodData = JSON.parse('{{ mood_distribution|safe }}');
 </script>
 {% endblock %}

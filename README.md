@@ -1,5 +1,5 @@
 
-# DataWhisper
+# HealthWhisper
 
 A data analytics web application that allows users to upload personal datasets, view insightful automated visualizations, and selectively share results with trusted users.
 

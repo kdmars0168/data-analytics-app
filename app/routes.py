@@ -49,7 +49,10 @@ def register():
         db.session.commit()
         flash('Account created successfully!', 'success')
         return redirect(url_for('main.login'))
-
+    
+    else:
+        print("Form validation failed. Errors:", form.errors)
+        
     return render_template('register.html', form=form)
 
 @main.route('/login', methods=['GET', 'POST'])
@@ -250,34 +253,37 @@ def download_template():
 @main.route('/submit_manual', methods=['POST'])
 @login_required
 def submit_manual():
-    date = request.form['date']
-    steps = request.form['steps']
-    sleep = request.form['sleep']
-    mood_text = request.form['mood']
+    try:
+        date_str = request.form['date']
+        steps = request.form['steps']
+        sleep = request.form['sleep']
+        mood_text = request.form['mood']
 
-    # Define mood-to-int mapping
-    MOOD_MAP = {
-        "Sad": 0,
-        "Stressed": 1,
-        "Tired": 2,
-        "Neutral": 3,
-        "Happy": 4
-    }
+        # Validate and parse inputs
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+        steps_val = int(steps)
+        sleep_val = float(sleep)
 
-    # Convert to numeric value
-    mood = MOOD_MAP.get(mood_text, 3)  # Defaults to 'Neutral'
+        MOOD_MAP = {
+            "Sad": 0, "Stressed": 1, "Tired": 2, "Neutral": 3, "Happy": 4
+        }
+        mood_val = MOOD_MAP.get(mood_text, 3)
 
-    record = HealthRecord(
-        user_id=current_user.id,
-        date=datetime.strptime(date, '%Y-%m-%d').date(),
-        steps=int(steps),
-        sleep_hours=float(sleep),
-        mood=mood
-    )
-    db.session.add(record)
-    db.session.commit()
-    flash('Manual data submitted successfully!', 'success')
-    return redirect(url_for('main.upload'))
+        record = HealthRecord(
+            user_id=current_user.id,
+            date=date_obj,
+            steps=steps_val,
+            sleep_hours=sleep_val,
+            mood=mood_val
+        )
+        db.session.add(record)
+        db.session.commit()
+        flash('Manual data submitted successfully!', 'success')
+        return redirect(url_for('main.upload'))
+
+    except Exception as e:
+        flash(f"Error in manual submission: {e}", "danger")
+        return "Invalid input", 400
 
 
 @main.route('/share', methods=['GET', 'POST'])

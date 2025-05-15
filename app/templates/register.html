@@ -1,5 +1,5 @@
-{% extends 'base.html' %} {% block title %}Register | HealthWhisper{% endblock %}
-{% block content %}
+{% extends 'base.html' %} {% block title %}Register | HealthWhisper{% endblock
+%} {% block content %}
 <section
   class="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
 >
@@ -21,7 +21,14 @@
           Get started with your data analytics journey
         </p>
       </div>
-
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div
+        class="text-center py-2 px-4 text-sm font-medium rounded {% if category == 'success' %} text-green-700 bg-green-100 {% elif category == 'danger' %} text-red-700 bg-red-100 {% else %} text-gray-700 bg-gray-100 {% endif %}"
+      >
+        {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% endwith %}
       <form
         action="{{ url_for('main.register') }}"
         method="POST"
@@ -57,29 +64,76 @@
         </div>
 
         <div>
-          <label for="gender" class="block text-sm font-medium text-gray-700 text-left">Gender</label>
-          <select id="gender" name="gender" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500">
+          <label
+            for="gender"
+            class="block text-sm font-medium text-gray-700 text-left"
+            >Gender</label
+          >
+          <select
+            id="gender"
+            name="gender"
+            class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+          >
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="other">Other</option>
           </select>
         </div>
         <div>
-          <label for="dob" class="block text-sm font-medium text-gray-700 text-left">Date of Birth</label>
-          <input type="date" id="dob" name="dob" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500" required>
+          <label
+            for="dob"
+            class="block text-sm font-medium text-gray-700 text-left"
+            >Date of Birth</label
+          >
+          <input
+            type="date"
+            id="dob"
+            name="dob"
+            class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            required
+          />
         </div>
         <div>
-          <label for="height" class="block text-sm font-medium text-gray-700 text-left">Height (cm)</label>
-          <input type="text" id="height" name="height" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500" required>
+          <label
+            for="height"
+            class="block text-sm font-medium text-gray-700 text-left"
+            >Height (cm)</label
+          >
+          <input
+            type="text"
+            id="height"
+            name="height"
+            class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            required
+          />
         </div>
 
         <div>
-          <label for="weight" class="block text-sm font-medium text-gray-700 text-left">Weight (kg)</label>
-          <input type="text" id="weight" name="weight" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500" required>
+          <label
+            for="weight"
+            class="block text-sm font-medium text-gray-700 text-left"
+            >Weight (kg)</label
+          >
+          <input
+            type="text"
+            id="weight"
+            name="weight"
+            class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            required
+          />
         </div>
         <div>
-          <label for="medical_conditions" class="block text-sm font-medium text-gray-700 text-left">Medical Conditions (optional)</label>
-          <textarea id="medical_conditions" name="medical_conditions" class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500" rows="3"></textarea>
+          <label
+            for="medical_conditions"
+            class="block text-sm font-medium text-gray-700 text-left"
+            >Medical Conditions (optional)</label
+          >
+          <textarea
+            id="medical_conditions"
+            name="medical_conditions"
+            class="mt-1 w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
+            rows="3"
+          ></textarea>
         </div>
         <div>
           {{ form.submit(class="w-full flex justify-center py-2 px-4 border

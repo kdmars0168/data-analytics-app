@@ -2,7 +2,7 @@ import os, json
 from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify, send_from_directory, current_app, session
 from app import db
 from app.forms import RegistrationForm, LoginForm, EditProfileForm
-from app.models import User, SharedData, HealthRecord, SharedChart
+from app.models import User, SharedData, HealthRecord
 from flask_login import login_user, logout_user, login_required, current_user
 from app.utils import generate_analysis_summary
 from sqlalchemy import extract
@@ -12,11 +12,10 @@ from werkzeug.utils import secure_filename
 from collections import defaultdict
 from statistics import mean
 from app.forms import EditProfileForm, ContactForm
-from app.models import User, Contact, SharedData, Dataset, SharedData
-from app.models import  PersonalizedMessage
+from app.models import User, Contact, SharedData, SharedData
 from app.forms import PersonalizedMessageForm
 from app.forms import ManualDataForm,ShareDataForm
-from app.forms import UploadForm
+from app.forms import UploadForm, LogoutForm
 from flask import request, flash, redirect, url_for, render_template
 
 # Create a Blueprint called 'main'
@@ -212,19 +211,19 @@ def upload():
             count = 0
             for row in reader:
                 try:
-                        # Get mood value as string
-                        mood_raw = row['mood'].strip()
+                    # Get mood value as string
+                    mood_raw = row['mood'].strip()
 
-                        # Mapping from mood string to number
-                        MOOD_MAP = {"Sad": 0, "Stressed": 1, "Tired": 2, "Neutral": 3, "Happy": 4}
+                    # Mapping from mood string to number
+                    MOOD_MAP = {"Sad": 0, "Stressed": 1, "Tired": 2, "Neutral": 3, "Happy": 4}
 
-                        # Try to convert mood to int (if already a number), otherwise map it
-                        try:
-                            mood = int(mood_raw)
-                        except ValueError:
-                            mood = MOOD_MAP.get(mood_raw, 3)  # default to Neutral if unrecognized
+                    # Try to convert mood to int (if already a number), otherwise map it
+                    try:
+                        mood = int(mood_raw)
+                    except ValueError:
+                        mood = MOOD_MAP.get(mood_raw, 3)  # default to Neutral if unrecognized
 
-                        # Now safely create and save the record
+                    # Now safely create and save the record
                     record = HealthRecord(
                         user_id=current_user.id,
                         date=datetime.strptime(row['date'].strip(), "%Y-%m-%d").date(),
@@ -237,6 +236,7 @@ def upload():
 
                 except Exception as e:
                     print(f"[UPLOAD ERROR] Skipping row: {row} — Error: {e}")
+
             db.session.commit()
             print(f"[DEBUG] Uploaded {count} records for user ID {current_user.id}")
 
@@ -244,6 +244,7 @@ def upload():
         return redirect(url_for('main.dashboard'))
 
     return render_template('upload.html', form=form)
+
 
 
 @main.route('/download_template')
@@ -285,48 +286,7 @@ def submit_manual():
     return redirect(url_for('main.upload'))
 
 
-@main.route('/share', methods=['GET', 'POST'])
-@login_required
-def share():
-    form = ContactForm()
-    contacts = Contact.query.filter_by(user_id=current_user.id).all()
 
-    dataset_value_to_id = {
-        "steps": 1,
-        "sleep": 2,
-        "mood": 3,
-        "sleep_vs_mood": 4
-    }
-
-    if request.method == 'POST':
-        selected_contact_id = request.form.get('selected_contact_id')
-        selected_dataset_ids = request.form.getlist('selected_dataset_ids')  # <-- This gets a list of IDs
-        
-        # If adding a new contact
-        if selected_contact_id == "add_new":
-            name = request.form.get("new_contact_name")
-            email = request.form.get("new_contact_email")
-            contact = Contact.query.filter_by(email=email, user_id=current_user.id).first()
-            if not contact:
-                contact = Contact(name=name, email=email, user_id=current_user.id)
-                db.session.add(contact)
-                db.session.commit()
-            selected_contact_id = contact.id  # Use new contact's id
-
-        # Share selected datasets
-        for dataset_id in selected_dataset_ids:
-            shared_chart = SharedChart(
-                dataset_id=dataset_id,
-                shared_with_id=selected_contact_id,
-                owner_id=current_user.id
-            )
-            db.session.add(shared_chart)
-        db.session.commit()
-        flash('Charts shared!', 'success')
-        return redirect(url_for('main.share'))
-
-    contacts = Contact.query.filter_by(user_id=current_user.id).all()
-    return render_template('share.html', form=form, contacts=contacts)
 
 # @main.route('/shared-with-me')
 # @login_required
@@ -360,54 +320,6 @@ def share():
 #         contacts=contacts
 #     )
 
-#Dummy route for shared_with_me
-@main.route('/shared-with-me')
-@login_required
-def shared_with_me():
-    # === DUMMY DATA VERSION FOR FRONTEND DEVELOPMENT ===
-
-    # Simulated contacts
-    contacts = [
-        {'id': 1, 'name': 'Jane Smith', 'email': 'jane@example.com'},
-        {'id': 2, 'name': 'John Doe', 'email': 'john@example.com'},
-        {'id': 3, 'name': 'Sarah Wilson', 'email': 'sarah@example.com'}
-    ]
-
-    # Simulated users who shared with you
-    shared_users = [
-        {
-            'name': 'Jane Smith',
-            'email': 'jane@example.com',
-            'initials': 'JS',
-            'shared_since': datetime(2025, 4, 10)
-        },
-        {
-            'name': 'John Doe',
-            'email': 'john@example.com',
-            'initials': 'JD',
-            'shared_since': datetime(2025, 4, 12)
-        },
-        {
-            'name': 'Sarah Wilson',
-            'email': 'sarah@example.com',
-            'initials': 'SW',
-            'shared_since': datetime(2025, 4, 15)
-        }
-    ]
-
-    # Simulated datasets (you can filter these by user later)
-    shared_datasets = [
-        {'title': 'Weekly Step Count', 'chart_type': 'Bar Chart'},
-        {'title': 'Sleep Patterns', 'chart_type': 'Line Chart'},
-        {'title': 'Mood Distribution', 'chart_type': 'Pie Chart'}
-    ]
-
-    return render_template(
-        'shared_with_me.html',
-        contacts=contacts,
-        shared_users=shared_users,
-        shared_datasets=shared_datasets
-    )
 
 @main.route('/profile')
 @login_required
@@ -450,20 +362,21 @@ def profile():
     return render_template('profile.html', form=form, user=current_user)
 
 
-@main.route('/save_message', methods=['POST'])
-@login_required
-def save_message():
-    data = request.get_json() 
-    message_text = data.get('message')  
-    if message_text is not None:
-        existing_msg = PersonalizedMessage.query.filter_by(user_id=current_user.id).first()
-        if existing_msg:
-            existing_msg.message = message_text 
-        else:
-            new_msg = PersonalizedMessage(user_id=current_user.id, message=message_text)  
-            db.session.add(new_msg)
-        db.session.commit()
-    return jsonify({'status': 'saved'}) 
+# @main.route('/save_message', methods=['POST'])
+# @login_required
+# def save_message():
+#     data = request.get_json() 
+#     message_text = data.get('message')  
+#     if message_text is not None:
+#         existing_msg = PersonalizedMessage.query.filter_by(user_id=current_user.id).first()
+#         if existing_msg:
+#             existing_msg.message = message_text 
+#         else:
+#             new_msg = PersonalizedMessage(user_id=current_user.id, message=message_text)  
+#             db.session.add(new_msg)
+#         db.session.commit()
+#     return jsonify({'status': 'saved'})
+
 @main.route('/share', methods=['GET'])
 @login_required
 def share():
@@ -535,6 +448,7 @@ def share_data():
 @login_required
 def shared_with_me():
     shared_records = SharedData.query.filter_by(shared_with_contact_email=current_user.email).all()
+
     shared_by_user_ids = list(set(record.shared_by_user_id for record in shared_records))
     shared_users = User.query.filter(User.id.in_(shared_by_user_ids)).all()
 
@@ -545,20 +459,57 @@ def shared_with_me():
     sleep_data = []
     mood_data = []
     sleep_vs_mood_data = []
+    shared_data_types = []
 
     if user_id:
         selected_user = User.query.get(user_id)
         if selected_user:
-            # 从 HealthRecord 表中获取该用户所有健康数据，按日期排序
-            records = HealthRecord.query.filter_by(user_id=user_id).order_by(HealthRecord.date).all()
+            
+            shared_records_for_user = SharedData.query.filter_by(
+                shared_by_user_id=user_id,
+                shared_with_contact_email=current_user.email
+            ).all()
 
-            # 组装数据格式：每条都是 {'date': 'YYYY-MM-DD', 'value': xxx}
-            steps_data = [{'date': r.date.strftime('%Y-%m-%d'), 'steps': r.steps} for r in records]
-            sleep_data = [{'date': r.date.strftime('%Y-%m-%d'), 'sleep_hours': r.sleep_hours} for r in records]
-            mood_data = [{'date': r.date.strftime('%Y-%m-%d'), 'mood': r.mood} for r in records]
+            
+            records = []
+            for shared_record in shared_records_for_user:
+                shared_at = shared_record.shared_at
 
-            # sleep_vs_mood_data 为二维数据，可以直接用 date, sleep_hours, mood
-            sleep_vs_mood_data = [{'date': r.date.strftime('%Y-%m-%d'), 'sleep_hours': r.sleep_hours, 'mood': r.mood} for r in records]
+                matched_records = HealthRecord.query.filter(
+                    HealthRecord.user_id == user_id,
+                    HealthRecord.uploaded_at <= shared_at
+                ).order_by(HealthRecord.date).all()
+
+                records.extend(matched_records)
+
+
+            records = list({r.id: r for r in records}.values())
+
+
+            shared_data_types_query = db.session.query(SharedData.data_type).filter_by(
+                shared_by_user_id=user_id,
+                shared_with_contact_email=current_user.email
+            ).distinct().all()
+            shared_data_types = [item[0] for item in shared_data_types_query]
+
+            if 'steps' in shared_data_types:
+                steps_data = [{'date': r.date.strftime('%Y-%m-%d'), 'steps': r.steps} for r in records if r.steps is not None]
+
+            if 'sleep_hours' in shared_data_types:
+                sleep_data = [{'date': r.date.strftime('%Y-%m-%d'), 'sleep_hours': r.sleep_hours} for r in records if r.sleep_hours is not None]
+
+            if 'moods' in shared_data_types:
+                mood_data = [{'date': r.date.strftime('%Y-%m-%d'), 'mood': r.mood} for r in records if r.mood is not None]
+
+            if 'sleep_vs_mood' in shared_data_types:
+                sleep_vs_mood_data = [
+                    {
+                        'date': r.date.strftime('%Y-%m-%d'),
+                        'sleep_hours': r.sleep_hours,
+                        'mood': r.mood
+                    }
+                    for r in records if r.sleep_hours is not None and r.mood is not None
+                ]
 
     return render_template(
         'shared_with_me.html',
@@ -567,5 +518,10 @@ def shared_with_me():
         steps_data=steps_data,
         sleep_data=sleep_data,
         mood_data=mood_data,
-        sleep_vs_mood_data=sleep_vs_mood_data
+        sleep_vs_mood_data=sleep_vs_mood_data,
+        shared_data_types=shared_data_types  
     )
+
+@main.context_processor
+def inject_logout_form():
+    return dict(form=LogoutForm())

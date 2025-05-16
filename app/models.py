@@ -50,7 +50,7 @@ class HealthRecord(db.Model):
     steps = db.Column(db.Integer, nullable=False)
     sleep_hours = db.Column(db.Float, nullable=False)
     mood = db.Column(db.Integer, nullable=False)  # Mood score 1–10
-
+    uploaded_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow) 
     user = db.relationship('User', backref='health_records')
 
 
@@ -63,26 +63,4 @@ class Contact(db.Model):
 
     def __repr__(self):
         return f"<Contact {self.name}>"
-class PersonalizedMessage(db.Model):
-    id = db.Column(db.Integer, primary_key=True) 
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  
-    message = db.Column(db.Text, nullable=True)  
-    created_at = db.Column(db.DateTime, default=db.func.current_timestamp()) 
-    user = db.relationship('User', backref='personalized_messages', lazy=True)
 
-    def __repr__(self):
-        return f'<PersonalizedMessage {self.id} from user {self.user_id}>'
-
-
-class Dataset(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    title = db.Column(db.String(128))
-    chart_type = db.Column(db.String(32))
-
-class SharedChart(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    dataset_id = db.Column(db.Integer, db.ForeignKey('dataset.id'))  # <-- use dataset_id
-    shared_with_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # recipient
-    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # sharer
-    shared_since = db.Column(db.DateTime, default=datetime.utcnow)

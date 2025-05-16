@@ -65,3 +65,6 @@ class UploadForm(FlaskForm):
         FileAllowed(['csv'], 'CSV files only!')
     ])
     submit = SubmitField('Upload')
+
+class LogoutForm(FlaskForm):
+    pass

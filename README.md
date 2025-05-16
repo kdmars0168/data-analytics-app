@@ -97,6 +97,7 @@ Unit tests are designed to verify the correctness of individual functions, metho
 `pytest tests -v`
 
 Selenium tests, on the other hand, automate real user interactions within a web browser to test the frontend functionality and user interface. These tests simulate actions like logging in, navigating pages, uploading files, and submitting forms, ensuring that the whole application behaves as expected from the user’s perspective. While more comprehensive, Selenium tests require a configured browser environment and are slower to run compared to unit tests.
+Before doing the selenim test, please creat a user with '123@gmail.com' as its email and '123456' as its password
 `pytest tests_selenium -v`
 
 ---

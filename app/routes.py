@@ -17,7 +17,7 @@ from app.forms import PersonalizedMessageForm
 from app.forms import ManualDataForm,ShareDataForm
 from app.forms import UploadForm, LogoutForm
 from flask import request, flash, redirect, url_for, render_template
-
+from flask import abort, jsonify
 # Create a Blueprint called 'main'
 main = Blueprint('main', __name__)
 
@@ -198,10 +198,15 @@ def logout():
 @login_required
 def upload():
     form = UploadForm()
-
+    if request.method == 'POST':
+        file = request.files.get('file')
+        if not file or not file.filename.lower().endswith('.csv'):
+            flash('Invalid file format', 'error')
+            return redirect(url_for('main.upload'))
     if form.validate_on_submit():
         file = form.file.data
         filename = secure_filename(file.filename)
+
         filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
         os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
         file.save(filepath)
@@ -211,19 +216,13 @@ def upload():
             count = 0
             for row in reader:
                 try:
-                    # Get mood value as string
                     mood_raw = row['mood'].strip()
-
-                    # Mapping from mood string to number
                     MOOD_MAP = {"Sad": 0, "Stressed": 1, "Tired": 2, "Neutral": 3, "Happy": 4}
-
-                    # Try to convert mood to int (if already a number), otherwise map it
                     try:
                         mood = int(mood_raw)
                     except ValueError:
                         mood = MOOD_MAP.get(mood_raw, 3)  # default to Neutral if unrecognized
 
-                    # Now safely create and save the record
                     record = HealthRecord(
                         user_id=current_user.id,
                         date=datetime.strptime(row['date'].strip(), "%Y-%m-%d").date(),
@@ -233,15 +232,19 @@ def upload():
                     )
                     db.session.add(record)
                     count += 1
-
                 except Exception as e:
                     print(f"[UPLOAD ERROR] Skipping row: {row} — Error: {e}")
 
             db.session.commit()
             print(f"[DEBUG] Uploaded {count} records for user ID {current_user.id}")
 
-        flash('File uploaded and data saved successfully!', 'success')
-        return redirect(url_for('main.dashboard'))
+
+        if count == 0:
+            flash('Upload failed. No valid records were found.', 'error')
+            return redirect(url_for('main.upload'))  
+        else:
+            flash('File uploaded and data saved successfully!', 'success')
+            return redirect(url_for('main.dashboard'))
 
     return render_template('upload.html', form=form)
 
@@ -252,16 +255,17 @@ def upload():
 def download_template():
     template_dir = os.path.join(current_app.root_path, 'static', 'assets')
     return send_from_directory(template_dir, 'template.csv', as_attachment=True)
-
 @main.route('/submit_manual', methods=['POST'])
 @login_required
 def submit_manual():
-    date = request.form['date']
-    steps = request.form['steps']
-    sleep = request.form['sleep']
-    mood_text = request.form['mood']
+    date_str = request.form.get('date')
+    steps = request.form.get('steps')
+    sleep = request.form.get('sleep')
+    mood_text = request.form.get('mood')
 
-    # Define mood-to-int mapping
+    if not all([date_str, steps, sleep, mood_text]):
+        return jsonify(error="Missing required field"), 400
+
     MOOD_MAP = {
         "Sad": 0,
         "Stressed": 1,
@@ -270,20 +274,47 @@ def submit_manual():
         "Happy": 4
     }
 
-    # Convert to numeric value
-    mood = MOOD_MAP.get(mood_text, 3)  # Defaults to 'Neutral'
+  
+    try:
+        parsed_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify(error="Invalid date format"), 400
 
-    record = HealthRecord(
-        user_id=current_user.id,
-        date=datetime.strptime(date, '%Y-%m-%d').date(),
-        steps=int(steps),
-        sleep_hours=float(sleep),
-        mood=mood
-    )
-    db.session.add(record)
-    db.session.commit()
-    flash('Manual data submitted successfully!', 'success')
+
+    try:
+        steps_int = int(steps)
+        sleep_float = float(sleep)
+    except ValueError:
+        return jsonify(error="Steps or sleep invalid"), 400
+
+    mood = MOOD_MAP.get(mood_text)
+    if mood is None:
+        return jsonify(error="Invalid mood value"), 400
+
+    try:
+        existing_record = HealthRecord.query.filter_by(user_id=current_user.id, date=parsed_date).first()
+        if existing_record:
+            existing_record.steps = steps_int
+            existing_record.sleep_hours = sleep_float
+            existing_record.mood = mood
+            db.session.commit()
+            flash('Existing record updated successfully!', 'success')
+        else:
+            record = HealthRecord(
+                user_id=current_user.id,
+                date=parsed_date,
+                steps=steps_int,
+                sleep_hours=sleep_float,
+                mood=mood
+            )
+            db.session.add(record)
+            db.session.commit()
+            flash('Manual data submitted successfully!', 'success')
+    except Exception:
+        return jsonify(error="Database error"), 500
+
     return redirect(url_for('main.upload'))
+
 
 
 
@@ -321,13 +352,12 @@ def submit_manual():
 #     )
 
 
-@main.route('/profile')
+@main.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
     form = EditProfileForm()
 
     if request.method == 'POST' and form.validate_on_submit():
-        # Use 'name' instead of 'username'
         name = form.name.data
         gender = form.gender.data
         dob = form.dob.data
@@ -351,7 +381,8 @@ def profile():
             flash(f'An error occurred while saving your profile: {e}', 'error')
             return redirect(url_for('main.profile'))
 
-    if form.is_submitted():
+
+    if request.method == 'GET' or not form.validate_on_submit():
         form.name.data = current_user.name
         form.gender.data = current_user.gender
         form.dob.data = current_user.dob
@@ -360,7 +391,6 @@ def profile():
         form.medical_conditions.data = current_user.medical_conditions
 
     return render_template('profile.html', form=form, user=current_user)
-
 
 # @main.route('/save_message', methods=['POST'])
 # @login_required

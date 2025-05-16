@@ -9,6 +9,17 @@
   <div class="profile-container">
     <div class="profile-card">
       <h2 class="text-center text-3xl font-extrabold text-gray-900 mb-6">Your Profile</h2>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-messages mb-4">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
       <form method="POST" action="{{ url_for('main.profile') }}">
         {{ form.hidden_tag() }}
         <div class="form-grid">

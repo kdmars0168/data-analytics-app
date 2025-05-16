@@ -7,7 +7,7 @@ from pathlib import Path
 import os
 
 def test_upload_and_view_dashboard():
-    browser = webdriver.Edge()
+    browser = webdriver.Chrome()
 
     try:
         browser.get("http://localhost:5000/login")

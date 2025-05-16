@@ -7,7 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 def test_register():
     browser = webdriver.Chrome()
-    test_email = "user4@example.com"
+    test_email = "user5@example.com"
     try:
  
         browser.get("http://127.0.0.1:5000/register")
@@ -20,7 +20,7 @@ def test_register():
         time.sleep(1)
 
   
-        browser.find_element(By.NAME, "name").send_keys("User4")
+        browser.find_element(By.NAME, "name").send_keys("User5")
         time.sleep(1)
 
 

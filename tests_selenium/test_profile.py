@@ -4,8 +4,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+
 def test_update_profile():
-    browser = webdriver.Edge()
+    browser = webdriver.Chrome()
     try:
       
         browser.get("http://localhost:5000/login")

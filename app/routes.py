@@ -555,3 +555,9 @@ def shared_with_me():
 @main.context_processor
 def inject_logout_form():
     return dict(form=LogoutForm())
+
+
+@main.route('/force-logout')
+def force_logout():
+    session.clear()
+    return redirect(url_for('main.index'))

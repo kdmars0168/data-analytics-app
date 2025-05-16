@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 {% extends "base.html" %} {% block content %}
+=======
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/swmstyles.css') }}">
+
+>>>>>>> share_part
 <div class="flex flex-col lg:flex-row gap-6 p-6">
   <!-- LEFT SIDEBAR -->
   <div class="w-full lg:w-1/3 bg-white rounded-xl shadow p-5">
@@ -8,6 +16,7 @@
     <p class="text-sm text-gray-500 mb-4">
       Select a user to view their shared data
     </p>
+<<<<<<< HEAD
 
     <!-- Filter dropdown -->
     <div class="mb-4">
@@ -90,10 +99,21 @@
           {% endif %}
         </div>
       </div>
+=======
+    <div id="user-list" class="space-y-3">
+      {% for user in shared_users %}
+      <a href="{{ url_for('main.shared_with_me') }}?user_id={{ user.id }}">
+        <div class="bg-gray-50 hover:bg-purple-50 border border-gray-200 rounded-lg p-4">
+          <p class="font-semibold text-sm text-gray-900">{{ user.name }}</p>
+          <p class="text-xs text-gray-500">{{ user.email }}</p>
+        </div>
+      </a>
+>>>>>>> share_part
       {% endfor %}
     </div>
   </div>
 
+<<<<<<< HEAD
   <!-- RIGHT CONTENT -->
   <div class="w-full lg:w-2/3 space-y-6">
     <!-- Placeholder if no user selected -->
@@ -190,10 +210,51 @@
           </div>
         </div>
       </div>
+=======
+  <!-- RIGHT: VISUALIZATION AREA -->
+  <div class="w-full lg:w-2/3 space-y-6">
+    <div class="bg-white rounded-xl shadow p-5">
+      <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+        {% if selected_user %}
+          {{ selected_user.name }}'s Shared Visualizations
+        {% else %}
+          No user selected
+        {% endif %}
+      </h2>
+
+      {% if selected_user %}
+      <div class="visualization-grid">
+
+        <div class="visualization-box">
+          <h3 class="text-lg font-semibold mb-2">Steps Over Time</h3>
+          <canvas id="stepsChart"></canvas>
+        </div>
+
+        <div class="visualization-box">
+          <h3 class="text-lg font-semibold mb-2">Sleep Hours Over Time</h3>
+          <canvas id="sleepChart"></canvas>
+        </div>
+
+        <div class="visualization-box">
+          <h3 class="text-lg font-semibold mb-2">Mood Distribution</h3>
+          <canvas id="moodChart"></canvas>
+        </div>
+
+        <div class="visualization-box">
+          <h3 class="text-lg font-semibold mb-2">Sleep vs Mood</h3>
+          <canvas id="sleepMoodChart"></canvas>
+        </div>
+
+      </div>
+      {% else %}
+      <p class="text-gray-500 italic">Please select a user to view shared data.</p>
+      {% endif %}
+>>>>>>> share_part
     </div>
   </div>
 </div>
 
+<<<<<<< HEAD
 <!-- Toast -->
 <div
   id="toast"
@@ -202,5 +263,19 @@
 
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+=======
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Embed data for JS -->
+<script>
+  const stepsData = {{ steps_data|tojson }};
+  const sleepData = {{ sleep_data|tojson }};
+  const moodData = {{ mood_data|tojson }};
+  const sleepVsMoodData = {{ sleep_vs_mood_data|tojson }};
+</script>
+
+<!-- External JS File -->
+>>>>>>> share_part
 <script src="{{ url_for('static', filename='js/shared_with_me.js') }}"></script>
 {% endblock %}

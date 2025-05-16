@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 :root {
     --primary-purple: #A076F9;
@@ -331,3 +332,31 @@ body {
 .dataset-icon-wrapper.orange svg {
     color: var(--icon-color-orange);
 }
+=======
+.visualization-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); 
+  gap: 1.5rem;
+}
+
+.visualization-box {
+  background-color: #f9fafb; 
+  padding: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  height: 320px; 
+  display: flex;
+  flex-direction: column;
+}
+
+.visualization-box canvas {
+  flex-grow: 1; 
+  max-height: 100%; 
+}
+#moodChart {
+  width: 200px;
+  height: 100px;
+  margin: 0 auto;
+  display: block;
+}
+>>>>>>> share_part

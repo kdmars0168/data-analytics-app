@@ -7,16 +7,24 @@ A data analytics web application that allows users to upload personal datasets, 
 
 ## ✨ Purpose and Design
 
-- **Purpose**: 
-  - To help users better understand their private data by providing automated visualization and analysis tools.
-  - To allow secure and selective sharing of insights with trusted individuals.
-  
-- **Design and Use**:
-  - The application features a clean, intuitive frontend built with HTML, TailwindCSS, and JavaScript (with some JQuery).
-  - The backend uses Flask with SQLAlchemy ORM connected to an SQLite database.
-  - Users can create an account, upload CSV files, visualize patterns (using bar, line, pie charts), and manage sharing settings.
-  - Strong focus on privacy, simplicity, and user experience.
-  - Mobile responsive design ensures accessibility across devices.
+##  Health Data Analytics App
+
+###  Purpose
+- Help users make sense of their personal health data through automated analysis and visualization.
+- Enable secure and selective sharing of health insights with trusted individuals (e.g., doctors, family).
+
+###  Design & Features
+- **Frontend**: Clean, responsive interface built with **HTML**, **TailwindCSS**,**CSS** and **JavaScript** (with some **jQuery**).
+- **Backend**: Developed using **Flask** with **SQLAlchemy ORM** and an **SQLite** database.
+- **User Capabilities**:
+  - Register and manage a personal account.
+  - Upload CSV files containing health data (e.g., steps, sleep hours, mood).
+  - Automatically generate **bar**, **line**, and **pie charts** to visualize trends.
+  - Manage sharing preferences for individual data types.
+- **Focus Areas**:
+  - Simplicity and clarity in user interaction.
+  - Strong data **privacy** and **selective sharing**.
+  - **Mobile-responsive** design for cross-device accessibility.
 
 ---
 
@@ -78,18 +86,12 @@ A data analytics web application that allows users to upload personal datasets, 
 
 ---
 
-## 🧪 How to Run Tests
+Unit tests are designed to verify the correctness of individual functions, methods, or modules in isolation without relying on a browser or UI. They are lightweight and fast to run, usually focusing on the business logic or backend code. Unit tests are commonly written using testing frameworks such as pytest and can be executed quickly to catch regressions early in the development cycle.
+`pytest tests_selenium/test_profile.py`
 
-(Currently, testing is manual.)
 
-- After launching the application, manually verify:
-  - User registration
-  - User login
-  - Data upload
-  - Data visualization
-  - Data sharing functionality
-
-(Automated tests can be added later using `pytest`.)
+Selenium tests, on the other hand, automate real user interactions within a web browser to test the frontend functionality and user interface. These tests simulate actions like logging in, navigating pages, uploading files, and submitting forms, ensuring that the whole application behaves as expected from the user’s perspective. While more comprehensive, Selenium tests require a configured browser environment and are slower to run compared to unit tests.
+`pytest tests/unit_tests.py`
 
 ---
 

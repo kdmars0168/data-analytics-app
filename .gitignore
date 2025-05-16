@@ -1,17 +1,28 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.pyc
+*.py[cod]
+*.so
 
 # Virtual environment
 venv/
+env/
 
-# Instance folder containing SQLite DB
+# Test and coverage cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Database and instance folder
 instance/
 *.db
 
-# VSCode settings
+# VSCode and editor settings
 .vscode/
+.idea/
 
 # MacOS and Windows system files
 .DS_Store
 Thumbs.db
+
+# Git metadata (exclude if zipping or packaging)
+.git/

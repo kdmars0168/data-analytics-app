@@ -33,6 +33,8 @@ def test_upload_and_view_dashboard():
 
         # choose the file to upload
         file_input = browser.find_element(By.ID, "file-upload")
+        # ✅ Force input visible before interacting (important for hidden file inputs)
+        browser.execute_script("arguments[0].classList.remove('hidden')", file_input)
         file_input.send_keys(absolute_path)
         time.sleep(1)
 

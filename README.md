@@ -6,16 +6,16 @@ A data analytics web application that allows users to upload personal datasets, 
 
 ## ✨ Purpose and Design
 
-## Health Data Analytics App
+### Health Data Analytics App
 
-### Purpose
+#### Purpose
 
 - Help users make sense of their personal health data through automated analysis and visualization.
 - Enable secure and selective sharing of health insights with trusted individuals (e.g., doctors, family).
 
-### Design & Features
+#### Design & Features
 
-- **Frontend**: Clean, responsive interface built with **HTML**, **TailwindCSS**,**CSS** and **JavaScript** (with some **jQuery**).
+- **Frontend**: Clean, responsive interface built with **HTML**, **TailwindCSS**, **CSS**, and **JavaScript** (with some **jQuery**).
 - **Backend**: Developed using **Flask** with **SQLAlchemy ORM** and an **SQLite** database.
 - **User Capabilities**:
   - Register and manage a personal account.
@@ -87,17 +87,46 @@ A data analytics web application that allows users to upload personal datasets, 
    ```
 
 7. **Open the app in your browser**:
+
    ```
    http://127.0.0.1:5000/
    ```
 
 ---
 
-Unit tests are designed to verify the correctness of individual functions, methods, or modules in isolation without relying on a browser or UI. They are lightweight and fast to run, usually focusing on the business logic or backend code. Unit tests are commonly written using testing frameworks such as pytest and can be executed quickly to catch regressions early in the development cycle.
-`pytest tests -v`
+### 🔐 Default Test User (for Selenium Tests)
 
-Selenium tests, on the other hand, automate real user interactions within a web browser to test the frontend functionality and user interface. These tests simulate actions like logging in, navigating pages, uploading files, and submitting forms, ensuring that the whole application behaves as expected from the user’s perspective. While more comprehensive, Selenium tests require a configured browser environment and are slower to run compared to unit tests.
-`pytest tests_selenium -v`
+Some Selenium tests rely on logging in with a predefined user.
+
+➡️ **You must create a user with the following credentials** for tests to pass:
+
+- **Email**: `123@gmail.com`
+- **Password**: `123456`
+
+Steps:
+1. Run the app.
+2. Visit `http://127.0.0.1:5000/register`.
+3. Register a user using the above email and password (fill other fields as needed).
+
+---
+
+## 🧪 Testing
+
+### ✅ Unit Tests
+
+Designed to verify individual backend functions or routes using an in-memory SQLite DB.
+
+```bash
+pytest tests -v
+```
+
+### 🧪 Selenium Tests
+
+Automated UI tests simulating real user actions via browser.
+
+```bash
+pytest tests_selenium -v
+```
 
 ---
 
@@ -107,73 +136,71 @@ Selenium tests, on the other hand, automate real user interactions within a web 
 data-analytics-app/
 │
 ├── app/
-│ ├── init.py # App factory
-│ ├── forms.py # WTForms definitions
-│ ├── models.py # SQLAlchemy models
-│ ├── routes.py # Flask routes/views
-│ ├── utils.py # Utility functions
-│ ├── new_utils.py # (Additional helper logic)
-│ ├── static/
-│ │ ├── css/ # Tailwind/CSS styles
-│ │ ├── js/ # Custom JS scripts
-│ │ │ ├── dashboard.js
-│ │ │ ├── main.js
-│ │ │ ├── share.js
-│ │ │ ├── shared_with_me.js
-│ │ │ └── upload.js
-│ │ └── assets/ # Image/assets if used
-│ ├── uploads/ # Sample CSVs for dev/test
-│ │ ├── sample.csv
-│ │ ├── sample_valid.csv
-│ │ └── ...
-│ └── templates/
-│ ├── base.html
-│ ├── index.html
-│ ├── login.html
-│ ├── register.html
-│ ├── profile.html
-│ ├── edit_profile.html
-│ ├── upload.html
-│ ├── dashboard.html
-│ ├── shared_with_me.html
-│ ├── share.html
-│ └── partials/
-│ └── sidebar.html
+│   ├── __init__.py             # App factory
+│   ├── forms.py                # WTForms definitions
+│   ├── models.py               # SQLAlchemy models
+│   ├── routes.py               # Flask routes/views
+│   ├── utils.py                # Utility functions
+│   ├── new_utils.py            # (Optional: Additional helpers)
+│   ├── static/
+│   │   ├── css/                # Tailwind/CSS styles
+│   │   ├── js/                 # Custom JS scripts
+│   │   │   ├── dashboard.js
+│   │   │   ├── main.js
+│   │   │   ├── share.js
+│   │   │   ├── shared_with_me.js
+│   │   │   └── upload.js
+│   │   └── assets/             # Images/assets
+│   ├── uploads/                # Sample CSVs for dev/testing
+│   │   ├── sample.csv
+│   │   └── sample_valid.csv
+│   └── templates/
+│       ├── base.html
+│       ├── index.html
+│       ├── login.html
+│       ├── register.html
+│       ├── profile.html
+│       ├── edit_profile.html
+│       ├── upload.html
+│       ├── dashboard.html
+│       ├── shared_with_me.html
+│       ├── share.html
+│       └── partials/
+│           └── sidebar.html
 │
 ├── instance/
-│ └── app.db # Local SQLite DB
+│   └── app.db                  # Local SQLite DB
 │
-├── migrations/ # Alembic DB migrations
-│ ├── versions/
-│ ├── env.py
-│ ├── README
-│ └── script.py.mako
+├── migrations/                 # Alembic DB migrations
+│   ├── versions/
+│   ├── env.py
+│   ├── README
+│   └── script.py.mako
 │
-├── tests/ # Unit tests (uses in-memory DB)
-│ ├── conftest.py
-│ ├── test_routes.py
-│ ├── test_models.py
-│ ├── test_upload.py
-│ ├── test_utils.py
-│ ├── ...
-│ └── uploads/ # CSV files for testing uploads
+├── tests/                      # Unit tests
+│   ├── conftest.py
+│   ├── test_routes.py
+│   ├── test_models.py
+│   ├── test_upload.py
+│   ├── test_utils.py
+│   └── uploads/
+│       └── ... CSVs for unit tests
 │
-├── tests_selenium/ # Selenium UI tests
-│ ├── conftest.py
-│ ├── test_login.py
-│ ├── test_register.py
-│ ├── test_profile.py
-│ ├── test_upload.py
-│ ├── test_dashboard.py
-│ └── uploads/ # Selenium test CSVs
+├── tests_selenium/             # Selenium UI tests
+│   ├── conftest.py
+│   ├── test_login.py
+│   ├── test_register.py
+│   ├── test_profile.py
+│   ├── test_upload.py
+│   ├── test_dashboard.py
+│   └── uploads/
+│       └── ... Selenium test CSVs
 │
-├── venv/ # Virtual environment (excluded via .gitignore)
-├── config.py # App configuration
-├── run.py # App entry point
-├── requirements.txt # Pip dependencies
-├── create_demo_user.py # (Optional: setup script)
+├── venv/                       # Virtual environment (excluded)
+├── config.py                   # App configuration
+├── run.py                      # App entry point
+├── requirements.txt            # Pip dependencies
+├── create_demo_user.py         # (Optional script)
 ├── .gitignore
 └── README.md
 ```
-
----

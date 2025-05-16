@@ -32,14 +32,14 @@ def test_login_and_logout():
 
       
         logout_btn = WebDriverWait(browser, 10).until(
-            EC.element_to_be_clickable((By.XPATH, "//button[contains(., 'Logout')]"))
+            EC.element_to_be_clickable((By.XPATH, "//form//button[contains(., 'Logout')]"))
         )
         logout_btn.click()
         time.sleep(2)
 
    
         WebDriverWait(browser, 10).until(
-            EC.url_contains("/login")
+        EC.presence_of_element_located((By.NAME, "email"))
         )
         print("Logout successful, returned to:", browser.current_url)
 

@@ -62,6 +62,7 @@
   <!-- Logout button at bottom -->
   <div class="p-6">
     <form action="{{ url_for('main.logout') }}" method="post">
+      {{ form.csrf_token }}
       <button
         type="submit"
         class="w-full flex items-center justify-center bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg"

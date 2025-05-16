@@ -1,6 +1,16 @@
 {% extends "base.html" %} {% block title %}Upload Data - HealthWhisper{%
 endblock %} {% block content %}
 <div class="max-w-4xl mx-auto mt-10">
+ {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul>
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
   <div class="mb-8">
     <h1 class="text-4xl font-bold text-center mb-4 text-gray-900">
       Upload Your Data
@@ -52,6 +62,7 @@ endblock %} {% block content %}
           enctype="multipart/form-data"
           action="{{ url_for('main.upload') }}"
         >
+          {{ form.hidden_tag() }} 
           <div
             class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer"
           >
@@ -118,6 +129,7 @@ endblock %} {% block content %}
         </p>
 
         <form method="post" action="{{ url_for('main.submit_manual') }}">
+          {{ form.hidden_tag() }}
           <div class="space-y-4">
             <div class="form-item">
               <label class="form-label text-lg text-gray-700">Date</label>

@@ -2,7 +2,7 @@ import os, json
 from flask import Blueprint, render_template, flash, redirect, url_for, request, jsonify, send_from_directory, current_app, session
 from app import db
 from app.forms import RegistrationForm, LoginForm, EditProfileForm
-from app.models import User, UploadedData, SharedData, HealthRecord, SharedChart
+from app.models import User, SharedData, HealthRecord
 from flask_login import login_user, logout_user, login_required, current_user
 from app.utils import generate_analysis_summary
 from sqlalchemy import extract
@@ -12,8 +12,12 @@ from werkzeug.utils import secure_filename
 from collections import defaultdict
 from statistics import mean
 from app.forms import EditProfileForm, ContactForm
-from app.models import User, Contact, SharedData, Dataset
-
+from app.models import User, Contact, SharedData, SharedData
+from app.forms import PersonalizedMessageForm
+from app.forms import ManualDataForm,ShareDataForm
+from app.forms import UploadForm, LogoutForm
+from flask import request, flash, redirect, url_for, render_template
+from flask import abort, jsonify
 # Create a Blueprint called 'main'
 main = Blueprint('main', __name__)
 
@@ -193,69 +197,75 @@ def logout():
 @main.route('/upload', methods=['GET', 'POST'])
 @login_required
 def upload():
+    form = UploadForm()
     if request.method == 'POST':
         file = request.files.get('file')
-        if file and file.filename.endswith('.csv'):
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-            os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
-            file.save(filepath)
+        if not file or not file.filename.lower().endswith('.csv'):
+            flash('Invalid file format', 'error')
+            return redirect(url_for('main.upload'))
+    if form.validate_on_submit():
+        file = form.file.data
+        filename = secure_filename(file.filename)
 
-            with open(filepath, 'r') as f:
-                reader = csv.DictReader(f)
-                count = 0
-                for row in reader:
+        filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+        file.save(filepath)
+
+        with open(filepath, 'r') as f:
+            reader = csv.DictReader(f)
+            count = 0
+            for row in reader:
+                try:
+                    mood_raw = row['mood'].strip()
+                    MOOD_MAP = {"Sad": 0, "Stressed": 1, "Tired": 2, "Neutral": 3, "Happy": 4}
                     try:
-                        # Get mood value as string
-                        mood_raw = row['mood'].strip()
+                        mood = int(mood_raw)
+                    except ValueError:
+                        mood = MOOD_MAP.get(mood_raw, 3)  # default to Neutral if unrecognized
 
-                        # Mapping from mood string to number
-                        MOOD_MAP = {"Sad": 0, "Stressed": 1, "Tired": 2, "Neutral": 3, "Happy": 4}
+                    record = HealthRecord(
+                        user_id=current_user.id,
+                        date=datetime.strptime(row['date'].strip(), "%Y-%m-%d").date(),
+                        steps=int(row['steps'].strip()),
+                        sleep_hours=float(row['sleep_hours'].strip()),
+                        mood=mood
+                    )
+                    db.session.add(record)
+                    count += 1
+                except Exception as e:
+                    print(f"[UPLOAD ERROR] Skipping row: {row} — Error: {e}")
 
-                        # Try to convert mood to int (if already a number), otherwise map it
-                        try:
-                            mood = int(mood_raw)
-                        except ValueError:
-                            mood = MOOD_MAP.get(mood_raw, 3)  # default to Neutral if unrecognized
+            db.session.commit()
+            print(f"[DEBUG] Uploaded {count} records for user ID {current_user.id}")
 
-                        # Now safely create and save the record
-                        record = HealthRecord(
-                            user_id=current_user.id,
-                            date=datetime.strptime(row['date'].strip(), "%Y-%m-%d").date(),
-                            steps=int(row['steps'].strip()),
-                            sleep_hours=float(row['sleep_hours'].strip()),
-                            mood=mood
-                        )
-                        db.session.add(record)
-                        count += 1
 
-                    except Exception as e:
-                        print(f"[UPLOAD ERROR] Skipping row: {row} — Error: {e}")
-                db.session.commit()
-                print(f"[DEBUG] Uploaded {count} records for user ID {current_user.id}")
-
+        if count == 0:
+            flash('Upload failed. No valid records were found.', 'error')
+            return redirect(url_for('main.upload'))  
+        else:
             flash('File uploaded and data saved successfully!', 'success')
             return redirect(url_for('main.dashboard'))
-        else:
-            flash('Invalid file format. Please upload a CSV file.', 'danger')
 
-    return render_template('upload.html')
+    return render_template('upload.html', form=form)
+
+
 
 @main.route('/download_template')
 @login_required
 def download_template():
     template_dir = os.path.join(current_app.root_path, 'static', 'assets')
     return send_from_directory(template_dir, 'template.csv', as_attachment=True)
-
 @main.route('/submit_manual', methods=['POST'])
 @login_required
 def submit_manual():
-    date = request.form['date']
-    steps = request.form['steps']
-    sleep = request.form['sleep']
-    mood_text = request.form['mood']
+    date_str = request.form.get('date')
+    steps = request.form.get('steps')
+    sleep = request.form.get('sleep')
+    mood_text = request.form.get('mood')
 
-    # Define mood-to-int mapping
+    if not all([date_str, steps, sleep, mood_text]):
+        return jsonify(error="Missing required field"), 400
+
     MOOD_MAP = {
         "Sad": 0,
         "Stressed": 1,
@@ -264,64 +274,50 @@ def submit_manual():
         "Happy": 4
     }
 
-    # Convert to numeric value
-    mood = MOOD_MAP.get(mood_text, 3)  # Defaults to 'Neutral'
+  
+    try:
+        parsed_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        return jsonify(error="Invalid date format"), 400
 
-    record = HealthRecord(
-        user_id=current_user.id,
-        date=datetime.strptime(date, '%Y-%m-%d').date(),
-        steps=int(steps),
-        sleep_hours=float(sleep),
-        mood=mood
-    )
-    db.session.add(record)
-    db.session.commit()
-    flash('Manual data submitted successfully!', 'success')
+
+    try:
+        steps_int = int(steps)
+        sleep_float = float(sleep)
+    except ValueError:
+        return jsonify(error="Steps or sleep invalid"), 400
+
+    mood = MOOD_MAP.get(mood_text)
+    if mood is None:
+        return jsonify(error="Invalid mood value"), 400
+
+    try:
+        existing_record = HealthRecord.query.filter_by(user_id=current_user.id, date=parsed_date).first()
+        if existing_record:
+            existing_record.steps = steps_int
+            existing_record.sleep_hours = sleep_float
+            existing_record.mood = mood
+            db.session.commit()
+            flash('Existing record updated successfully!', 'success')
+        else:
+            record = HealthRecord(
+                user_id=current_user.id,
+                date=parsed_date,
+                steps=steps_int,
+                sleep_hours=sleep_float,
+                mood=mood
+            )
+            db.session.add(record)
+            db.session.commit()
+            flash('Manual data submitted successfully!', 'success')
+    except Exception:
+        return jsonify(error="Database error"), 500
+
     return redirect(url_for('main.upload'))
 
 
-@main.route('/share', methods=['GET', 'POST'])
-@login_required
-def share():
-    form = ContactForm()
-    contacts = Contact.query.filter_by(user_id=current_user.id).all()
 
-    dataset_value_to_id = {
-        "steps": 1,
-        "sleep": 2,
-        "mood": 3,
-        "sleep_vs_mood": 4
-    }
 
-    if request.method == 'POST':
-        selected_contact_id = request.form.get('selected_contact_id')
-        selected_dataset_ids = request.form.getlist('selected_dataset_ids')  # <-- This gets a list of IDs
-        
-        # If adding a new contact
-        if selected_contact_id == "add_new":
-            name = request.form.get("new_contact_name")
-            email = request.form.get("new_contact_email")
-            contact = Contact.query.filter_by(email=email, user_id=current_user.id).first()
-            if not contact:
-                contact = Contact(name=name, email=email, user_id=current_user.id)
-                db.session.add(contact)
-                db.session.commit()
-            selected_contact_id = contact.id  # Use new contact's id
-
-        # Share selected datasets
-        for dataset_id in selected_dataset_ids:
-            shared_chart = SharedChart(
-                dataset_id=dataset_id,
-                shared_with_id=selected_contact_id,
-                owner_id=current_user.id
-            )
-            db.session.add(shared_chart)
-        db.session.commit()
-        flash('Charts shared!', 'success')
-        return redirect(url_for('main.share'))
-
-    contacts = Contact.query.filter_by(user_id=current_user.id).all()
-    return render_template('share.html', form=form, contacts=contacts)
 
 # @main.route('/shared-with-me')
 # @login_required
@@ -355,93 +351,213 @@ def share():
 #         contacts=contacts
 #     )
 
-#Dummy route for shared_with_me
-@main.route('/shared-with-me')
+
+@main.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    form = EditProfileForm()
+
+    if request.method == 'POST' and form.validate_on_submit():
+        name = form.name.data
+        gender = form.gender.data
+        dob = form.dob.data
+        height = form.height.data
+        weight = form.weight.data
+        medical_conditions = form.medical_conditions.data
+
+        current_user.name = name
+        current_user.gender = gender
+        current_user.dob = dob
+        current_user.height = height
+        current_user.weight = weight
+        current_user.medical_conditions = medical_conditions
+
+        try:
+            db.session.commit()
+            flash('Profile updated successfully!', 'success')
+            return redirect(url_for('main.profile'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'An error occurred while saving your profile: {e}', 'error')
+            return redirect(url_for('main.profile'))
+
+
+    if request.method == 'GET' or not form.validate_on_submit():
+        form.name.data = current_user.name
+        form.gender.data = current_user.gender
+        form.dob.data = current_user.dob
+        form.height.data = current_user.height
+        form.weight.data = current_user.weight
+        form.medical_conditions.data = current_user.medical_conditions
+
+    return render_template('profile.html', form=form, user=current_user)
+
+# @main.route('/save_message', methods=['POST'])
+# @login_required
+# def save_message():
+#     data = request.get_json() 
+#     message_text = data.get('message')  
+#     if message_text is not None:
+#         existing_msg = PersonalizedMessage.query.filter_by(user_id=current_user.id).first()
+#         if existing_msg:
+#             existing_msg.message = message_text 
+#         else:
+#             new_msg = PersonalizedMessage(user_id=current_user.id, message=message_text)  
+#             db.session.add(new_msg)
+#         db.session.commit()
+#     return jsonify({'status': 'saved'})
+
+@main.route('/share', methods=['GET'])
+@login_required
+def share():
+
+    contact_form = ContactForm()
+    share_form = ShareDataForm()
+
+
+    contacts = Contact.query.filter_by(user_id=current_user.id).all()
+    share_form.contacts.choices = [(c.id, f"{c.name} - {c.email}") for c in contacts]
+
+    message_text = ""
+
+    return render_template('share.html',
+                           share_form=share_form,
+                           contact_form=contact_form,
+                           contacts=contacts,
+                           message_text=message_text)
+
+
+@main.route('/add_contact', methods=['POST'])
+@login_required
+def add_contact():
+    form = ContactForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        email = form.email.data
+
+
+        existing = Contact.query.filter_by(user_id=current_user.id, email=email).first()
+        if existing:
+            flash("This contact already exists.", "warning")
+        else:
+            new_contact = Contact(user_id=current_user.id, name=name, email=email)
+            db.session.add(new_contact)
+            db.session.commit()
+            flash("Contact added successfully.", "success")
+    else:
+        flash("Invalid contact information.", "danger")
+
+    return redirect(url_for('main.share'))
+
+
+@main.route('/share_data', methods=['POST'])
+@login_required
+def share_data():
+    selected_visuals = request.form.getlist('visualizations')
+    selected_contacts = request.form.getlist('contacts')
+    message_text = request.form.get('personalized_message', '')
+
+    if not selected_visuals or not selected_contacts:
+        flash("Please select at least one visualization and one contact.", "danger")
+        return redirect(url_for('main.share'))
+
+    for contact_id in selected_contacts:
+        for vis in selected_visuals:
+            shared = SharedData(
+                shared_by_user_id=current_user.id,
+                data_type=vis,
+                shared_with_contact_email=Contact.query.get(contact_id).email
+            )
+            db.session.add(shared)
+    db.session.commit()
+    flash("Data shared successfully!", "success")
+    return redirect(url_for('main.share'))
+
+
+@main.route('/shared_with_me')
 @login_required
 def shared_with_me():
-    # === DUMMY DATA VERSION FOR FRONTEND DEVELOPMENT ===
+    shared_records = SharedData.query.filter_by(shared_with_contact_email=current_user.email).all()
 
-    # Simulated contacts
-    contacts = [
-        {'id': 1, 'name': 'Jane Smith', 'email': 'jane@example.com'},
-        {'id': 2, 'name': 'John Doe', 'email': 'john@example.com'},
-        {'id': 3, 'name': 'Sarah Wilson', 'email': 'sarah@example.com'}
-    ]
+    shared_by_user_ids = list(set(record.shared_by_user_id for record in shared_records))
+    shared_users = User.query.filter(User.id.in_(shared_by_user_ids)).all()
 
-    # Simulated users who shared with you
-    shared_users = [
-        {
-            'name': 'Jane Smith',
-            'email': 'jane@example.com',
-            'initials': 'JS',
-            'shared_since': datetime(2025, 4, 10)
-        },
-        {
-            'name': 'John Doe',
-            'email': 'john@example.com',
-            'initials': 'JD',
-            'shared_since': datetime(2025, 4, 12)
-        },
-        {
-            'name': 'Sarah Wilson',
-            'email': 'sarah@example.com',
-            'initials': 'SW',
-            'shared_since': datetime(2025, 4, 15)
-        }
-    ]
+    user_id = request.args.get('user_id', type=int)
 
-    # Simulated datasets (you can filter these by user later)
-    shared_datasets = [
-        {'title': 'Weekly Step Count', 'chart_type': 'Bar Chart'},
-        {'title': 'Sleep Patterns', 'chart_type': 'Line Chart'},
-        {'title': 'Mood Distribution', 'chart_type': 'Pie Chart'}
-    ]
+    selected_user = None
+    steps_data = []
+    sleep_data = []
+    mood_data = []
+    sleep_vs_mood_data = []
+    shared_data_types = []
+
+    if user_id:
+        selected_user = User.query.get(user_id)
+        if selected_user:
+            
+            shared_records_for_user = SharedData.query.filter_by(
+                shared_by_user_id=user_id,
+                shared_with_contact_email=current_user.email
+            ).all()
+
+            
+            records = []
+            for shared_record in shared_records_for_user:
+                shared_at = shared_record.shared_at
+
+                matched_records = HealthRecord.query.filter(
+                    HealthRecord.user_id == user_id,
+                    HealthRecord.uploaded_at <= shared_at
+                ).order_by(HealthRecord.date).all()
+
+                records.extend(matched_records)
+
+
+            records = list({r.id: r for r in records}.values())
+
+
+            shared_data_types_query = db.session.query(SharedData.data_type).filter_by(
+                shared_by_user_id=user_id,
+                shared_with_contact_email=current_user.email
+            ).distinct().all()
+            shared_data_types = [item[0] for item in shared_data_types_query]
+
+            if 'steps' in shared_data_types:
+                steps_data = [{'date': r.date.strftime('%Y-%m-%d'), 'steps': r.steps} for r in records if r.steps is not None]
+
+            if 'sleep_hours' in shared_data_types:
+                sleep_data = [{'date': r.date.strftime('%Y-%m-%d'), 'sleep_hours': r.sleep_hours} for r in records if r.sleep_hours is not None]
+
+            if 'moods' in shared_data_types:
+                mood_data = [{'date': r.date.strftime('%Y-%m-%d'), 'mood': r.mood} for r in records if r.mood is not None]
+
+            if 'sleep_vs_mood' in shared_data_types:
+                sleep_vs_mood_data = [
+                    {
+                        'date': r.date.strftime('%Y-%m-%d'),
+                        'sleep_hours': r.sleep_hours,
+                        'mood': r.mood
+                    }
+                    for r in records if r.sleep_hours is not None and r.mood is not None
+                ]
 
     return render_template(
         'shared_with_me.html',
-        contacts=contacts,
         shared_users=shared_users,
-        shared_datasets=shared_datasets
+        selected_user=selected_user,
+        steps_data=steps_data,
+        sleep_data=sleep_data,
+        mood_data=mood_data,
+        sleep_vs_mood_data=sleep_vs_mood_data,
+        shared_data_types=shared_data_types  
     )
 
-@main.route('/profile')
-@login_required
-def profile():
-    return render_template('profile.html', user=current_user)
+@main.context_processor
+def inject_logout_form():
+    return dict(form=LogoutForm())
 
 
-@main.route('/edit_profile', methods=['GET', 'POST'])
-
-@login_required
-def save_profile():
-    name = request.form.get('name')
-    email = request.form.get('email')
-    gender = request.form.get('gender')
-    dob_str = request.form.get('dob')
-    height = request.form.get('height')
-    weight = request.form.get('weight')
-    medical_conditions = request.form.get('medical_conditions')
-
-    try:
-        dob = datetime.strptime(dob_str, '%Y-%m-%d').date() if dob_str else None
-    except ValueError:
-        flash('Invalid date format. Please use YYYY-MM-DD.', 'error')
-        return redirect(url_for('main.profile'))
-
-
-    current_user.name = name
-    current_user.email = email
-    current_user.gender = gender
-    current_user.dob = dob
-    current_user.height = float(height) if height else None
-    current_user.weight = float(weight) if weight else None
-    current_user.medical_conditions = medical_conditions
-
-    try:
-        db.session.commit()
-        flash('Profile updated successfully!', 'success')
-        return redirect(url_for('main.profile'))
-    except Exception as e:
-        db.session.rollback()
-        flash('An error occurred while saving your profile: ' + str(e), 'error')
-        return redirect(url_for('main.profile'))
+@main.route('/force-logout')
+def force_logout():
+    session.clear()
+    return redirect(url_for('main.index'))
